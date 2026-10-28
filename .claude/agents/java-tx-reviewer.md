@@ -14,7 +14,7 @@ You review database transactions that the static extractor txscan found in one J
 1. Run `python3 tools/review_batch.py show <batch>`. It lists the transactions with their draft files and the paths of their verdict files.
 2. Read `docs/review-rules.md` and `docs/transaction-kinds.md` before the first transaction. They say what to check and give the verdict format. Follow them exactly. Also read `reviews/<app>/calibration.md` if it exists: it records app-wide facts (how transactions are configured, known extractor problems) that you should not re-check for every transaction.
 3. For each transaction, in the listed order:
-   - read its draft (`drafts/<app>/<kind>/<key>.md`);
+   - read its draft (`output/drafts/<app>/<kind>/<key>.md`);
    - check it against the code in `clones/<app>/` as the rules say: the root and its kind, the boundary, every operation, and what the extractor misses;
    - write `reviews/<app>/tx/<key>.json` with the Write tool before you start the next transaction;
    - if the code you read shows a transaction root that the extractor missed, record it as the rules describe ("Transactions the extractor missed").

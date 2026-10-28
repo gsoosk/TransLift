@@ -66,10 +66,10 @@ Then collect the statuses: `grep -H '^status:' reviews/*/calibration.md`.
 Skip the first four commands when `python3 tools/freeze.py check` passes and `python3 tools/make_batches.py --dry-run` does not complain about drafts: the freeze and the drafts are current.
 
 ```bash
-tools/run_all.sh -j 4                                # only if some out/<app>.json is missing or older than its rules or txscan.py
-python3 tools/check_recall.py --json deliver/recall.json
+tools/run_all.sh -j 4                                # only if some output/out/<app>.json is missing or older than its rules or txscan.py
+python3 tools/check_recall.py --json output/deliver/recall.json
 python3 tools/freeze.py freeze
-python3 tools/export_blocks.py                       # drafts/ for the reviewers
+python3 tools/export_blocks.py                       # output/drafts/ for the reviewers
 python3 tools/review_status.py --estimate
 python3 tools/make_batches.py --dry-run [--skip-readonly]
 ```
@@ -104,11 +104,11 @@ Ask whether to continue in this session or stop so they can run it.
 
 ```bash
 python3 tools/review_batch.py check-all
-python3 tools/apply_reviews.py                     # out/ + reviews/ -> out_reviewed/
-python3 tools/export_blocks.py --reviewed          # tx-blocks/<app>/<kind>/<n>_<root>.md, index.md, excluded.md
-python3 tools/check_recall.py --json deliver/recall.json
-python3 tools/aggregate.py --in out_reviewed      # deliver/*.csv, corpus_stats.json
-python3 tools/build_xlsx.py                        # build/java_tx_corpus.xlsx
+python3 tools/apply_reviews.py                     # out/ + reviews/ -> output/out_reviewed/
+python3 tools/export_blocks.py --reviewed          # output/tx-blocks/<app>/<kind>/<n>_<root>.md, index.md, excluded.md
+python3 tools/check_recall.py --json output/deliver/recall.json
+python3 tools/aggregate.py --in out_reviewed      # output/deliver/*.csv, corpus_stats.json
+python3 tools/build_xlsx.py                        # output/build/java_tx_corpus.xlsx
 tools/recalc_xlsx.sh && python3 tools/verify_xlsx.py
 ```
 
@@ -119,6 +119,6 @@ tools/recalc_xlsx.sh && python3 tools/verify_xlsx.py
 Tell the user, briefly:
 
 - apps: how many seeds and rule-selected, any dropped and why;
-- transactions by kind (from `deliver/corpus_stats.json`) and the review outcome: confirmed, corrected, added, excluded, not reviewed;
+- transactions by kind (from `output/deliver/corpus_stats.json`) and the review outcome: confirmed, corrected, added, excluded, not reviewed;
 - the main systematic problems and whether they were fixed;
-- where the results are: `deliver/` (CSVs), `build/java_tx_corpus.xlsx`, `tx-blocks/` (one Markdown file per transaction), `corpus/selection.md` (why each app was chosen).
+- where the results are: `output/deliver/` (CSVs), `output/build/java_tx_corpus.xlsx`, `output/tx-blocks/` (one Markdown file per transaction), `corpus/selection.md` (why each app was chosen).

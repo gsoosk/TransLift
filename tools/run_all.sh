@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Run txscan on every app in corpus/repos.tsv (or the slugs given), several at a time.
 # Usage: tools/run_all.sh [-j N] [--save-prev] [slug ...]
-#   --save-prev  copy the current out/<app>.json files to out_prev/ first, for tools/regress.py
+#   --save-prev  copy the current output/out/<app>.json files to output/out_prev/ first, for tools/regress.py
 # Exits non-zero if txscan failed for any app (their old output is kept and listed).
 set -u
 K="$(cd "$(dirname "$0")/.." && pwd)"
@@ -19,10 +19,10 @@ if [ ${#APPS[@]} -eq 0 ]; then
   mapfile -t APPS < <(python3 "$K/tools/corpus.py" apps)
 fi
 if [ $SAVE -eq 1 ]; then
-  mkdir -p "$K/out_prev"
+  mkdir -p "$K/output/out_prev"
   n=0
-  for a in "${APPS[@]}"; do [ -f "$K/out/$a.json" ] && cp "$K/out/$a.json" "$K/out_prev/$a.json" && n=$((n+1)); done
-  echo "saved $n outputs to out_prev/"
+  for a in "${APPS[@]}"; do [ -f "$K/output/out/$a.json" ] && cp "$K/output/out/$a.json" "$K/output/out_prev/$a.json" && n=$((n+1)); done
+  echo "saved $n outputs to output/out_prev/"
 fi
 log=$(mktemp)
 printf '%s\n' "${APPS[@]}" | xargs -P "$J" -I{} "$K/tools/run_one.sh" {} | tee "$log"

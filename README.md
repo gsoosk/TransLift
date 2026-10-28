@@ -12,11 +12,11 @@ This kit lets Claude Code build a corpus of the database transactions in well-kn
 
 | Path | Contents |
 |---|---|
-| `deliver/transactions.csv` | one row per transaction: root, kind, attributes, tables read and written, chopping-relevant features, review verdict |
-| `deliver/operations.csv` | one row per database operation, with tables, flags, SQL and whether a reviewer added or corrected it |
-| `deliver/corpus_summary.csv`, `excluded.csv`, `corpus_stats.json`, `recall.json` | per-app counts, what review excluded and why, corpus statistics, the `@Transactional` recall check |
-| `build/java_tx_corpus.xlsx` | the same data with README, Summary and Apps sheets built from formulas |
-| `tx-blocks/<app>/<kind>/<n>_<root>.md` | one file per transaction: its block, every method on the call path to its operations, the SQL, and the review |
+| `output/deliver/transactions.csv` | one row per transaction: root, kind, attributes, tables read and written, chopping-relevant features, review verdict |
+| `output/deliver/operations.csv` | one row per database operation, with tables, flags, SQL and whether a reviewer added or corrected it |
+| `output/deliver/corpus_summary.csv`, `excluded.csv`, `corpus_stats.json`, `recall.json` | per-app counts, what review excluded and why, corpus statistics, the `@Transactional` recall check |
+| `output/build/java_tx_corpus.xlsx` | the same data with README, Summary and Apps sheets built from formulas |
+| `output/tx-blocks/<app>/<kind>/<n>_<root>.md` | one file per transaction: its block, every method on the call path to its operations, the SQL, and the review |
 | `corpus/selection.md` | why each candidate application was accepted or rejected |
 
 ## Requirements
@@ -74,7 +74,7 @@ It claims batches, so an interactive `/tx-corpus review` and the driver can run 
 
 ## How review results flow back
 
-Each verdict is tied to a content hash of the transaction it judged. `tools/apply_reviews.py` applies valid, current verdicts to the extractor output (`out/` + `reviews/` → `out_reviewed/`): corrections replace operations and recompute counts, exclusions move to a separate list, and added transactions get ids `<app>:r1`, `r2`, .... If the extractor changes later, only transactions whose content changed lose their verdict; `tools/review_status.py` reports them and `tools/make_batches.py` puts them in new batches.
+Each verdict is tied to a content hash of the transaction it judged. `tools/apply_reviews.py` applies valid, current verdicts to the extractor output (`output/out/` + `reviews/` → `output/out_reviewed/`): corrections replace operations and recompute counts, exclusions move to a separate list, and added transactions get ids `<app>:r1`, `r2`, .... If the extractor changes later, only transactions whose content changed lose their verdict; `tools/review_status.py` reports them and `tools/make_batches.py` puts them in new batches.
 
 ## Layout
 
@@ -89,7 +89,7 @@ Each verdict is tied to a content hash of the transaction it judged. `tools/appl
 | `corpus/repos.tsv`, `corpus/pins/` | the app list and pinned commits (the 20 seeds are included) |
 | `corpus/probe/*.classes.txt` | class names of the seeds, for the near-duplicate check |
 | `rules/` | per-app extractor settings (5 seeds have some) |
-| `clones/`, `out/`, `drafts/`, `reviews/`, `out_reviewed/`, `tx-blocks/`, `deliver/`, `build/` | created by the pipeline |
+| `clones/`, `output/out/`, `output/drafts/`, `reviews/`, `output/out_reviewed/`, `output/tx-blocks/`, `output/deliver/`, `output/build/` | created by the pipeline |
 
 ## Working by hand
 

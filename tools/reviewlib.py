@@ -1,20 +1,20 @@
 """Review bookkeeping shared by make_batches.py, review_batch.py, review_status.py and apply_reviews.py.
 
-A review item is one transaction of out/<app>.json. Its verdict lives in reviews/<app>/tx/<key>.json and
+A review item is one transaction of output/out/<app>.json. Its verdict lives in reviews/<app>/tx/<key>.json and
 counts only while its stamped content hash (chash) equals the transaction's current hash."""
 import json, os
 import kitlib
 
 
 def app_items(slug):
-    """Review items of one app, in out/<app>.json order."""
+    """Review items of one app, in output/out/<app>.json order."""
     d = kitlib.load_out(slug)
     txs = d['transactions']
     id2key = kitlib.id_to_key(txs)
     items = []
     for t in txs:
         if 'key' not in t:
-            raise SystemExit(f"{slug}: out/{slug}.json has no transaction keys; re-run tools/run_one.sh {slug}")
+            raise SystemExit(f"{slug}: output/out/{slug}.json has no transaction keys; re-run tools/run_one.sh {slug}")
         draft = kitlib.draft_rel(slug, t)
         items.append({'key': t['key'], 'id': t['id'], 'app': slug, 'kind': t['kind'], 'subkind': t['subkind'],
                       'root': t['root'], 'file': t['file'], 'line': t['line'], 'n_ops': t['n_ops'],

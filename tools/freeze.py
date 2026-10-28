@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Freeze the extractor output before reviews start, so every reviewer sees the same transactions.
 
-  freeze.py freeze [apps ...]   record hashes of txscan.py, rules, pins and out/<app>.json in out/FROZEN.json
+  freeze.py freeze [apps ...]   record hashes of txscan.py, rules, pins and output/out/<app>.json in output/out/FROZEN.json
   freeze.py check               exit 1 (and say what changed) if any of them changed since the freeze
   freeze.py thaw                remove the freeze (do this before changing txscan.py or rules)
 

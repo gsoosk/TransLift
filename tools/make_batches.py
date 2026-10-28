@@ -54,7 +54,7 @@ def main():
         drafted = kitlib.jload(os.path.join(kitlib.DRAFTS, app, 'chash.json'), default={})
         old = [it for it in items if drafted.get(it['key']) != it['chash']]
         if old:
-            raise SystemExit(f"{app}: {len(old)} drafts are missing or older than out/{app}.json: "
+            raise SystemExit(f"{app}: {len(old)} drafts are missing or older than output/out/{app}.json: "
                              f"run python3 tools/export_blocks.py {app}")
         todo = []
         for it in items:

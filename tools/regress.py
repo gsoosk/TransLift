@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compare the previous extractor run (out_prev/) with the current one (out/): what an extractor change did.
+"""Compare the previous extractor run (output/out_prev/) with the current one (out/): what an extractor change did.
 
 Usage: regress.py [apps ...] [--show N]
   Per app: transactions by kind, operations, unknown-table share, and how many transactions appeared,

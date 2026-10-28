@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Apply review verdicts: out/<app>.json + reviews/<app>/ -> out_reviewed/<app>.json.
+"""Apply review verdicts: output/out/<app>.json + reviews/<app>/ -> output/out_reviewed/<app>.json.
 
 Usage: apply_reviews.py [apps ...] [--strict]
 

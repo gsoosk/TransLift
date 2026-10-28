@@ -36,7 +36,7 @@ def main():
     ap.add_argument('--kind')
     ap.add_argument('--list', action='store_true')
     ap.add_argument('--brief', action='store_true')
-    ap.add_argument('--reviewed', action='store_true', help='show out_reviewed/ instead of out/')
+    ap.add_argument('--reviewed', action='store_true', help='show output/out_reviewed/ instead of output/out/')
     a = ap.parse_args()
     app = kitlib.app_list([a.app])[0]
     d = kitlib.load_out(app, reviewed=a.reviewed)

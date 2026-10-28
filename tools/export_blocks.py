@@ -5,11 +5,11 @@ transactions called from implicit ones, external effects and locks), and the SQL
 each operation.
 
 Usage:
-  export_blocks.py [apps ...]                          drafts for reviewers: out/ -> drafts/<app>/<kind>/<key>.md
-  export_blocks.py --reviewed [apps ...]               final files: out_reviewed/ -> tx-blocks/<app>/<kind>/<n>_<root>.md
+  export_blocks.py [apps ...]                          drafts for reviewers: out/ -> output/drafts/<app>/<kind>/<key>.md
+  export_blocks.py --reviewed [apps ...]               final files: output/out_reviewed/ -> output/tx-blocks/<app>/<kind>/<n>_<root>.md
   export_blocks.py --only KEY[,KEY...] --stdout APP     print selected transactions (used by show_tx.py)
 
-Re-walks each root with the same analysis as txscan.py, so the operations match out/<app>.json exactly.
+Re-walks each root with the same analysis as txscan.py, so the operations match output/out/<app>.json exactly.
 """
 import argparse, collections, json, os, re, shutil, sys, textwrap, time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -560,8 +560,8 @@ def export_app(app, reviewed, dest, names, only=None, to_stdout=False):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('apps', nargs='*', help='app slugs (default: every app in corpus/repos.tsv)')
-    ap.add_argument('--reviewed', action='store_true', help='read out_reviewed/ and write the final tx-blocks/')
-    ap.add_argument('--dest', help='output directory (default drafts/ or, with --reviewed, tx-blocks/)')
+    ap.add_argument('--reviewed', action='store_true', help='read output/out_reviewed/ and write the final output/tx-blocks/')
+    ap.add_argument('--dest', help='output directory (default output/drafts/ or, with --reviewed, output/tx-blocks/)')
     ap.add_argument('--names', choices=('key', 'num'), help='file names by stable key (drafts) or by number (final)')
     ap.add_argument('--only', help='comma-separated keys, ids or numbers to render (needs exactly one app)')
     ap.add_argument('--stdout', action='store_true', help='print instead of writing files')

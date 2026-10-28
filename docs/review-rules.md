@@ -16,7 +16,7 @@ Definitions of the three kinds are in `docs/transaction-kinds.md`. Read it once.
 
 - `python3 tools/review_batch.py show <batch>`: the transactions, their draft files and their verdict paths.
 - **App facts:** `reviews/<app>/calibration.md`, when it exists, records how the app configures transactions (annotations, XML or AOP advice, transaction managers, data sources) and the extractor problems already known for this app. Read it once per batch and rely on its facts about the app. Where it disagrees with the drafts about what the extractor found, the drafts win: they come from the current extractor run.
-- The draft `drafts/<app>/<kind>/<key>.md`:
+- The draft `output/drafts/<app>/<kind>/<key>.md`:
   - **Header table.** Root, source file and line, key, attributes, entry points that reach it ("Reached from"), tables, shape, "Also" lines (nested transactions, effects, locks, analysis gaps). The Attributes line lists only what the annotation sets; anything not listed has its default (propagation REQUIRED, not read-only, default isolation, rollback on runtime exceptions). "Methods walked" counts every method the extractor visited, most of which never reach the database; the Code section shows only the methods on a path to something marked.
   - **Database operations**, numbered in the `#` column; your verdict refers to these numbers. The order is the order in which the extractor reached them (breadth-first), not execution order.
   - **Code.** The root first, then every method on the call path to each operation, copied verbatim with line ranges. Lines that touch the database, open nested transactions, call external services or take locks end with a `// <--` marker. Methods over 400 lines are cut around the marked lines.

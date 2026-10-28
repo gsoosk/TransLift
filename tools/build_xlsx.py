@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Build the corpus workbook from the CSVs written by aggregate.py.
-Usage: build_xlsx.py [deliver dir with CSVs] [output.xlsx]   (defaults: deliver/ and build/java_tx_corpus.xlsx)"""
+Usage: build_xlsx.py [deliver dir with CSVs] [output.xlsx]   (defaults: output/deliver/ and output/build/java_tx_corpus.xlsx)"""
 import sys as _sys
 if any(x in ('-h', '--help') for x in _sys.argv[1:]):
     print(__doc__)

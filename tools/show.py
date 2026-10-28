@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Print a readable summary of a txscan JSON file. Usage: show.py out/<app>.json [maxtx] [kindfilter]"""
+"""Print a readable summary of a txscan JSON file. Usage: show.py output/out/<app>.json [maxtx] [kindfilter]"""
 import sys as _sys
 if any(x in ('-h', '--help') for x in _sys.argv[1:]):
     print(__doc__)

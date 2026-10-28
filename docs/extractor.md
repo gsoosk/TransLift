@@ -24,7 +24,7 @@ Anything else that runs code on its own (custom dispatchers, Netty handlers, pla
 
 Test code is skipped: `src/test/`, test-named modules (`*-test`, `it`, `e2e`, `examples`, `demo`, `samples`, ...) and `*Test.java`-style files (`txscan.is_test_path`).
 
-Output: `out/<app>.json` with `stats`, `transactions` (each with a stable `key`, its operations, effects, locks, nested calls and analysis gaps) and `entities`.
+Output: `output/out/<app>.json` with `stats`, `transactions` (each with a stable `key`, its operations, effects, locks, nested calls and analysis gaps) and `entities`.
 
 ## Known blind spots
 
@@ -64,7 +64,7 @@ After editing: `tools/run_one.sh <app>` and `python3 tools/app_report.py <app>`.
 Only the `txscan-maintainer` agent (or you) changes `tools/txscan.py`, and only before the freeze, or after thawing it (`python3 tools/freeze.py thaw`). Keep the output deterministic. Check every change on all apps:
 
 ```bash
-tools/run_all.sh -j 4 --save-prev      # out/ -> out_prev/, then re-run
+tools/run_all.sh -j 4 --save-prev      # out/ -> output/out_prev/, then re-run
 python3 tools/regress.py               # what changed, per app
 python3 tools/check_recall.py          # @Transactional recall
 ```

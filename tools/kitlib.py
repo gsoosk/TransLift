@@ -17,15 +17,16 @@ def P(*parts):
 
 
 CLONES = P('clones')            # git checkouts, one per app (not shipped)
-OUT = P('out')                  # txscan output: out/<slug>.json
-OUT_PREV = P('out_prev')        # previous txscan output, for regression checks
-OUT_REV = P('out_reviewed')     # txscan output with review verdicts applied
-DRAFTS = P('drafts')            # one Markdown draft per transaction, read by reviewers
-BLOCKS = P('tx-blocks')         # final Markdown per transaction (from out_reviewed)
+OUTPUT = P('output')            # everything the tools generate; gitignored, rebuilt by /tx-corpus
+OUT = P('output', 'out')        # txscan output: output/out/<slug>.json
+OUT_PREV = P('output', 'out_prev')       # previous txscan output, for regression checks
+OUT_REV = P('output', 'out_reviewed')    # txscan output with review verdicts applied
+DRAFTS = P('output', 'drafts')  # one Markdown draft per transaction, read by reviewers
+BLOCKS = P('output', 'tx-blocks')        # final Markdown per transaction (from out_reviewed)
 REVIEWS = P('reviews')          # batches, verdicts, calibration reports, notes
 BATCHES = P('reviews', 'batches')
-DELIVER = P('deliver')          # CSVs and statistics
-BUILD = P('build')              # workbook
+DELIVER = P('output', 'deliver')         # CSVs and statistics
+BUILD = P('output', 'build')    # workbook
 RULES_DIR = P('rules')          # per-app txscan settings: rules/<slug>.json
 CORPUS = P('corpus')            # app list, pins, selection log, candidates, probes
 PINS = P('corpus', 'pins')
@@ -190,7 +191,7 @@ def tx_num(t):
 
 def draft_rel(slug, t):
     """Draft file of a transaction, relative to the kit root. Named by key so it survives renumbering."""
-    return os.path.join('drafts', slug, t['kind'], f"{t['key']}.md")
+    return os.path.join('output', 'drafts', slug, t['kind'], f"{t['key']}.md")
 
 
 def tokens_of(path):

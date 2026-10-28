@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Check the workbook's formula results against aggregate.py's statistics (after tools/recalc_xlsx.sh).
-Usage: verify_xlsx.py [deliver dir] [xlsx]   (defaults: deliver/ and build/java_tx_corpus.xlsx)"""
+Usage: verify_xlsx.py [deliver dir] [xlsx]   (defaults: output/deliver/ and output/build/java_tx_corpus.xlsx)"""
 import sys as _sys
 if any(x in ('-h', '--help') for x in _sys.argv[1:]):
     print(__doc__)

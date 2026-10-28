@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Recall check: every method annotated @Transactional (with a body, in non-test sources) should be an
-explicit declarative root in out/<app>.json.
+explicit declarative root in output/out/<app>.json.
 
-Usage: check_recall.py [apps ...] [--json deliver/recall.json] [--misses N]"""
+Usage: check_recall.py [apps ...] [--json output/deliver/recall.json] [--misses N]"""
 import argparse, json, os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import kitlib
@@ -58,7 +58,7 @@ def main():
     ap.add_argument('apps', nargs='*')
     ap.add_argument('--json', help='also write the result to this file')
     ap.add_argument('--misses', type=int, default=20, help='misses to print (default 20)')
-    ap.add_argument('--reviewed', action='store_true', help='check out_reviewed/ instead of out/')
+    ap.add_argument('--reviewed', action='store_true', help='check output/out_reviewed/ instead of output/out/')
     a = ap.parse_args()
     res = {'apps': {}, 'found': 0, 'annotated': 0, 'misses': []}
     for app in kitlib.app_list(a.apps):

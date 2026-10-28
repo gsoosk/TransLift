@@ -4,7 +4,7 @@
 Usage: aggregate.py [--in out_reviewed|out] [--out deliver] [apps ...]
   --in out_reviewed   reviewed outputs only; stop if an app has none (use this for the final build)
   --in out            extractor outputs only
-  default             per app: out_reviewed/ when it exists, else out/ (with a warning)
+  default             per app: output/out_reviewed/ when it exists, else output/out/ (with a warning)
 Writes transactions.csv, operations.csv, corpus_summary.csv, excluded.csv and corpus_stats.json."""
 import argparse, collections, csv, json, os, statistics, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -63,7 +63,7 @@ def main():
         rev, raw = os.path.join(kitlib.OUT_REV, app + '.json'), os.path.join(kitlib.OUT, app + '.json')
         if a.src == 'out_reviewed':
             if not os.path.exists(rev):
-                raise SystemExit(f"{app}: no out_reviewed/{app}.json: run python3 tools/apply_reviews.py first")
+                raise SystemExit(f"{app}: no output/out_reviewed/{app}.json: run python3 tools/apply_reviews.py first")
             sources[app] = rev
         elif a.src == 'out' or not os.path.exists(rev):
             if os.path.exists(raw):
