@@ -1,16 +1,10 @@
 {
+ "exclude_paths": [
+  "db-utils/"
+ ],
  "commit_points": [
-  [
-   "Weblogger",
-   "flush"
-  ],
-  [
-   "Planet",
-   "flush"
-  ],
-  [
-   "JPAPersistenceStrategy",
-   "flush"
-  ]
+  ["Weblogger", "flush"],
+  ["Planet", "flush"],
+  ["JPAPersistenceStrategy", "flush"]
  ]
 }

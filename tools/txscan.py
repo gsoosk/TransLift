@@ -202,6 +202,23 @@ def snake(name):
     s = re.sub(r'(?<!^)(?=[A-Z])', '_', name).lower()
     return s
 
+def is_servlet_signature(m):
+    """Is this really the servlet method the container calls: non-private, (ServletRequest, ServletResponse)?
+    Servlets often have private helpers named doGet/doPost/doPut with other parameters (Roller's
+    RollerAtomServlet); those are not entry points, their work belongs to the real service()/doX()."""
+    if 'private' in m.mods or 'static' in m.mods:
+        return False
+    if len(m.params) != 2:
+        return False
+    a, b = (simple(base_type(p[1])) for p in m.params)
+    return a.endswith('ServletRequest') and b.endswith('ServletResponse')
+
+def is_bean_accessor(name):
+    """getFoo / isFoo / hasFoo / toString: a JavaBean accessor read by the view, not a request handler."""
+    if name in ('toString', 'hashCode'):
+        return True
+    return bool(re.match(r'(get|is|has)[A-Z0-9_]', name))
+
 # ----------------------------------------------------------------------------
 # Declarations index (pass 1)
 # ----------------------------------------------------------------------------
@@ -918,6 +935,7 @@ def parse_jpa_xml(root, files):
                 x = fh.read()
         except Exception:
             continue
+        x = re.sub(r'<!--.*?-->', ' ', x, flags=re.S)      # a comment inside <named-query> must not hide its <query>
         if '<entity' not in x and '<hibernate-mapping' not in x and '<named-query' not in x:
             continue
         pkg = ''
@@ -1008,6 +1026,7 @@ class BodyScanner:
         self.wrapper_params = {}          # method id -> param index used as tx callback
         self.lock_sites = []
         self.const_cache = {}
+        self.named_queries = {}           # declared named queries (set before the file scan), name -> (kind, text)
 
     def entity_for_name(self, n):
         """Entity for a JPQL name: an entity name, or a mapped interface/superclass with exactly one entity."""
@@ -2135,6 +2154,12 @@ class BodyScanner:
                         qtext = cand
                         kind = 'sql' if re.search(r'native|sql', name, re.I) else None
                         break
+                    if isinstance(cand, str) and cand.strip() in self.named_queries:
+                        # app factory around createNamedQuery (Roller's getNamedUpdate / getNamedQueryCommitFirst):
+                        # the argument is a declared named query, so the statement is known
+                        qtext = 'NAMED:' + cand.strip()
+                        kind = 'named'
+                        break
                 n = n.child_by_field_name('object')
             elif n.type == 'identifier':
                 inits = [i for i in env['strings'].get('__init__' + T(n, src), []) if i.start_byte < n.start_byte]
@@ -2361,7 +2386,7 @@ class BodyScanner:
                     rec['arg_entity'] = e
                     rec['arg_entity_pos'] = ai
                     break
-        if rec['cls'] == 'txapi' and rec.get('what') in ('begin', 'commit-point'):
+        if rec['cls'] == 'txapi' and rec.get('what') in ('begin', 'commit-point', 'commit'):
             self.region_roots.setdefault(cur, []).append((rec.get('api'), rec['what'], rec['line']))
         if rec['cls'] == 'lock':
             self.lock_sites.append({'method': cur, 'kind': rec['lock_kind'], 'line': rec['line'], 'end': None,
@@ -2519,6 +2544,9 @@ class TxBuilder:
         self.tx_attr = {}   # method id -> attrs dict (effective declarative tx)
         self.async_methods = set()
         self.entry = {}     # method id -> kind
+        self.explicit_roots = set()   # roots of an explicit transaction: walk(mode='implicit') stops at them
+        self.region_tx_roots = []     # programmatic regions, in the order run() emits them
+        self.region_info = {}         # region root -> how its boundary was narrowed (first write / commit point)
         self.mapper_tables = {}
 
     # --- declarative --------------------------------------------------------------
@@ -2605,6 +2633,23 @@ class TxBuilder:
                                               'timeout': None, 'rollbackFor': None, 'manager': None,
                                               'non_public': False}
 
+    def framework_super(self, cls, names):
+        """Does cls implement one of these types from a library, as opposed to an app type of the same name?
+        Roller declares its own runnable.Job, which is not Quartz's Job."""
+        for s in self.idx.all_supers(cls):
+            if simple(s) in names and (s.startswith('EXT:') or s not in self.idx.types):
+                return True
+        return False
+
+    def is_struts_interceptor(self, cls):
+        """Is cls a Struts 2 / xwork interceptor (an entry point: it runs on every action of its stack)?
+        Decided on the qualified supertype, so that MyBatis's or Hibernate's Interceptor does not match."""
+        for s in self.idx.all_supers(cls):
+            if simple(s) in ('Interceptor', 'AbstractInterceptor', 'MethodFilterInterceptor') \
+                    and ('struts' in s.lower() or 'xwork' in s.lower()):
+                return True
+        return False
+
     def compute_entries(self):
         idx = self.idx
         for m in idx.methods.values():
@@ -2632,7 +2677,8 @@ class TxBuilder:
                 kind = 'message'
             elif m.name == 'onMessage' and sup & {'RocketMQListener', 'MessageListener', 'RocketMQReplyListener', 'MessageListenerConcurrently'}:
                 kind = 'message'
-            elif m.name == 'execute' and sup & {'Job', 'QuartzJobBean', 'Tasklet', 'StatefulJob'}:
+            elif m.name == 'execute' and sup & {'Job', 'QuartzJobBean', 'Tasklet', 'StatefulJob'} \
+                    and self.framework_super(m.cls, {'Job', 'QuartzJobBean', 'Tasklet', 'StatefulJob'}):
                 kind = 'scheduled'
             elif m.name == 'executeInternal' and sup & {'QuartzJobBean'}:
                 kind = 'scheduled'
@@ -2640,12 +2686,18 @@ class TxBuilder:
                 kind = 'batch'
             elif m.name in ('process',) and sup & {'ItemProcessor'}:
                 kind = 'batch'
-            elif m.name in ('doGet', 'doPost', 'doPut', 'doDelete', 'service') and sup & {'HttpServlet', 'GenericServlet'}:
-                kind = 'web'
-            elif sup & {'ActionSupport', 'UIAction'} and 'public' in m.mods and len(m.params) == 0 and base_type(m.ret_raw) == 'String':
-                kind = 'web'
+            elif m.name in ('doGet', 'doPost', 'doPut', 'doDelete', 'service') and sup & {'HttpServlet', 'GenericServlet'} \
+                    and is_servlet_signature(m):
+                kind = 'web'           # only the real override: a private/4-arg helper of the same name is not an entry point
+            elif sup & {'ActionSupport', 'UIAction'} and 'public' in m.mods and len(m.params) == 0 \
+                    and base_type(m.ret_raw) == 'String' and not is_bean_accessor(m.name):
+                kind = 'web'           # Struts 2 action method; a getter of the same shape is a view accessor, not a handler
             elif m.name in ('preHandle', 'postHandle', 'afterCompletion') and sup & {'HandlerInterceptor', 'AsyncHandlerInterceptor', 'HandlerInterceptorAdapter', 'WebRequestInterceptor'}:
                 kind = 'web'           # Spring MVC interceptors run on every matching request, outside the handler's transaction
+            elif m.name in ('intercept', 'doIntercept') and len(m.params) == 1 \
+                    and sup & {'Interceptor', 'AbstractInterceptor', 'MethodFilterInterceptor'} \
+                    and self.is_struts_interceptor(m.cls):
+                kind = 'web'           # Struts 2 / xwork interceptors run on every action in their stack, outside the action
             elif (m.name == 'doFilter' and sup & {'Filter', 'GenericFilterBean', 'HttpFilter'}) or \
                     (m.name == 'doFilterInternal' and sup & {'OncePerRequestFilter'}) or (m.name == 'filter' and sup & {'WebFilter'}):
                 kind = 'web'           # servlet and WebFlux filters
@@ -2696,6 +2748,91 @@ class TxBuilder:
                             if pid in rec['callbacks'] and mode != 'tx':
                                 lst[i] = (pid, 'tx', line)
 
+    def compute_explicit_roots(self):
+        """The methods that run a transaction of their own: declarative roots, programmatic callbacks, and the
+        programmatic regions (a method holding a begin, an app commit point or a commit). A region whose walk
+        finds no operation is a begin/commit helper, not a region (Roller's getEntityManager), and is dropped."""
+        sc = self.scan
+        cp_names = {m for (t, m) in self.rules.get('commit_points', [])}
+        self.region_tx_roots = []
+        for mid, lst in sorted(sc.region_roots.items()):
+            if mid in self.tx_attr:
+                continue
+            mm = self.idx.methods.get(mid)
+            if mm is not None and mm.name in cp_names and all(what == 'commit-point' for (a, what, l) in lst):
+                continue            # the commit point itself (Weblogger.flush), not a region around it
+            if not self.walk(mid)['ops']:
+                continue
+            self.region_tx_roots.append(mid)
+        self.explicit_roots = set(self.tx_attr) | set(sc.callback_roots) | set(self.region_tx_roots)
+
+    # --- region boundaries ----------------------------------------------------------
+    def region_bounds(self, root_id):
+        """Where the unit of work of a programmatic region really begins and ends inside its root method.
+
+        Only for a region recognised by an app commit point (`commit_points` in rules/<app>.json), where the
+        unit of work is hand-made and begun lazily:
+
+        begin: nothing shows that a transaction is open before the first write or locking read, so the reads
+        before it auto-commit on their own (Roller opens the unit in JPAPersistenceStrategy.getEntityManager(true),
+        called by the writes, not at method entry).
+        end: the last commit point called in the root method. Operations after it belong to the next unit, not
+        to this one -- Roller calls strategy.refresh(...) after roller.flush().
+
+        A region with a real begin/commit API (JDBC, a transaction manager) keeps the whole method: there the
+        transaction is open from the start, and dropping the statements after a commit would lose a unit that
+        nothing else records (DatabaseInstaller.upgradeTo400 commits five times and leaves work after the last).
+        """
+        sc = self.scan
+        ev = sc.region_roots.get(root_id)
+        if not ev or root_id in self.tx_attr:
+            return None
+        recs = [r for r in sc.calls.get(root_id, ()) if r.get('cls') == 'txapi']
+        begins = [r['line'] for r in recs if r.get('what') == 'begin']
+        if begins or not all(what == 'commit-point' for (a, what, l) in ev):
+            return None
+        commits = [r['line'] for r in recs if r.get('what') == 'commit-point']
+        return {'cut': max(commits) if commits else None}
+
+    def trim_region_ops(self, root_id, ops, parents, bounds):
+        """Drop the operations outside the region's own unit of work: those reached from a call site of the root
+        method after its commit, and (lazy begin) those reached before the first write or locking read.
+        Operations in a loop are kept: a line comparison cannot tell which iteration they belong to."""
+        def site(i):
+            """The line of the call site in the root method through which operation i is reached."""
+            op = ops[i]
+            m = op['method']
+            if m == root_id:
+                return op['line']
+            seen = set()
+            while True:
+                par = parents.get(m)
+                if not par or m in seen:
+                    return None
+                seen.add(m)
+                caller, line = par
+                if caller == root_id:
+                    return line
+                m = caller
+        sites = [site(i) for i in range(len(ops))]
+        cut = bounds['cut']
+        def movable(i):
+            return sites[i] is not None and not ops[i].get('loop')
+        after = {i for i in range(len(ops)) if cut is not None and movable(i) and sites[i] > cut}
+        # the lazy begin: the earliest call site of the root method that reaches a write or a locking read.
+        # Without a write and a lock, or with one that cannot be traced back to the root method, nothing shows
+        # where the unit starts and every operation is kept.
+        begin = None
+        trig = [sites[i] for i in range(len(ops)) if i not in after
+                and (ops[i].get('op') in ('W', 'L') or ops[i].get('lockhint'))]
+        if trig and all(t is not None for t in trig):
+            begin = min(trig)
+        before = {i for i in range(len(ops))
+                  if begin is not None and i not in after and movable(i) and sites[i] < begin}
+        out = [ops[i] for i in range(len(ops)) if i not in after and i not in before]
+        return out, {'begins_at': begin, 'commits_at': cut,
+                     'dropped_before_begin': len(before), 'dropped_after_commit': len(after)}
+
     # --- traversal ------------------------------------------------------------------
     def is_separate_tx(self, target_id, rec):
         a = self.tx_attr.get(target_id)
@@ -2706,8 +2843,12 @@ class TxBuilder:
             return 'self-invocation'
         return a['propagation']
 
-    def walk(self, root_id, mode='tx', max_nodes=6000, max_depth=40):
-        """Collect everything reachable from root within the same transaction context."""
+    def walk(self, root_id, mode='tx', max_nodes=6000, max_depth=40, sync_ranges=None):
+        """Collect everything reachable from root within the same transaction context.
+        sync_ranges: line ranges in the root method to which the region is limited (a synchronized block);
+        call sites of the root method outside them are not part of it."""
+        def in_region(line):
+            return sync_ranges is None or (line is not None and any(a <= line <= b for (a, b) in sync_ranges))
         idx, sc = self.idx, self.scan
         ops, nested, asyncs, effects, nondet, locks, txapis = [], [], [], [], [], [], []
         visited = {}
@@ -2745,6 +2886,8 @@ class TxBuilder:
             if mid in sc.sync_methods:
                 locks.append({'kind': 'synchronized-method', 'method': mid, 'line': meth.line if meth else None})
             for rec in sc.calls.get(mid, ()):
+                if mid == root_id and not in_region(rec['line']):
+                    continue
                 loop = ploop or rec['loop']; cond = pcond or rec['cond']
                 cls = rec['cls']
                 if cls == 'db':
@@ -2820,11 +2963,13 @@ class TxBuilder:
                             continue
                         a = self.tx_attr.get(t)
                         selfinv = rec.get('rkind') in ('implicit', 'this') and tm.cls == (meth.cls if meth else None)
+                        if mode == 'implicit' and t != root_id and t in self.explicit_roots and not (a and selfinv):
+                            # the callee runs its own transaction, whatever opens it: a declarative one, or a
+                            # programmatic region (its statements belong to that transaction, not to this entry point)
+                            units.append(('tx', {'target': t, 'line': rec['line'], 'method': mid, 'loop': loop, 'cond': cond}))
+                            continue
                         if a and not selfinv and t != root_id:
                             prop = a['propagation']
-                            if mode == 'implicit':
-                                units.append(('tx', {'target': t, 'line': rec['line'], 'method': mid, 'loop': loop, 'cond': cond}))
-                                continue
                             if prop in ('REQUIRES_NEW', 'NOT_SUPPORTED', 'NEVER') or (prop in ('REQUIRED', 'SUPPORTS', 'MANDATORY', 'NESTED') and False):
                                 nested.append({'target': t, 'propagation': prop, 'method': mid, 'line': rec['line'], 'loop': loop})
                                 continue
@@ -2836,6 +2981,8 @@ class TxBuilder:
                                 parents[t] = (mid, rec['line'])
                             queue.append((t, depth + 1, loop, cond, tent, path + (t,) if len(path) < 6 else path))
             for (pid, cmode, line) in sc.callbacks.get(mid, ()):
+                if mid == root_id and not in_region(line):
+                    continue
                 if cmode == 'async':
                     asyncs.append({'kind': 'async-callback', 'method': mid, 'line': line, 'target': pid})
                     continue
@@ -2849,6 +2996,16 @@ class TxBuilder:
                     parents[pid] = (mid, line)
                 queue.append((pid, depth + 1, ploop or cmode == 'loop', pcond or cmode == 'cond', ctxent, path))
         truncated = bool(queue) and nodes >= max_nodes
+        if mode == 'tx' and ops:
+            bounds = self.region_bounds(root_id)
+            if bounds is not None:
+                ops, info = self.trim_region_ops(root_id, ops, parents, bounds)
+                if info['begins_at'] is not None and info['dropped_before_begin']:
+                    txapis.append({'what': 'region begins here (lazy begin at the first write or locking read; '
+                                           'the reads before it are outside the unit)',
+                                   'api': 'region', 'method': root_id, 'line': info['begins_at']})
+                if sync_ranges is None:
+                    self.region_info[root_id] = info
         return {'ops': ops, 'nested': nested, 'async': asyncs, 'effects': effects, 'nondet': nondet, 'locks': locks,
                 'txapis': txapis, 'unresolved': unresolved, 'poly_skipped': poly, 'methods_visited': nodes,
                 'truncated': truncated, 'units': units, 'parents': parents,
@@ -3154,6 +3311,7 @@ def prepare(app_dir, app, rules):
     mappers = parse_mybatis(app_dir, xml_files)
     stg = parse_stg(app_dir, stg_files)
     scan = BodyScanner(idx, entities, mappers, stg, rules)
+    scan.named_queries = named_queries
     for rel, src in sources.items():
         tree = PARSER.parse(src)
         scan.scan_file(rel, src, tree)
@@ -3163,6 +3321,7 @@ def prepare(app_dir, app, rules):
     tb.compute_declarative()
     tb.compute_entries()
     tb.compute_wrapper_roots()
+    tb.compute_explicit_roots()
     return idx, scan, tb, entities, mappers, t0, t1
 
 
@@ -3190,14 +3349,8 @@ def run(app_dir, out_dir, app, commit, rules):
         mk_root(mid, 'explicit', sub, a)
     for pid, info in sorted(scan.callback_roots.items()):
         mk_root(pid, 'explicit', 'programmatic-callback', {'api': info['api'], 'site': label_of(idx, info['site_method']) + f":{info['line']}"})
-    cp_names = {m for (t, m) in rules.get('commit_points', [])}
-    for mid, lst in sorted(scan.region_roots.items()):
-        if mid in tb.tx_attr:
-            continue
-        mm = idx.methods.get(mid)
-        if mm is not None and mm.name in cp_names and all(w == 'commit-point' for (a, w, l) in lst):
-            continue
-        apis = sorted({f"{a}:{w}" for (a, w, l) in lst})
+    for mid in tb.region_tx_roots:
+        apis = sorted({f"{a}:{what}" for (a, what, l) in scan.region_roots[mid]})
         mk_root(mid, 'explicit', 'programmatic-region', {'api': ','.join(apis)})
     # ----- implicit transactions (entry points without an enclosing transaction)
     by_root = {t['root_id']: t for t in txs}
@@ -3205,7 +3358,9 @@ def run(app_dir, out_dir, app, commit, rules):
         t['invoked_by'] = []
     implicit = []
     for mid, ekind in sorted(tb.entry.items()):
-        if mid in tb.tx_attr:
+        if mid in by_root:
+            # the entry point is itself the root of an explicit transaction (a @Transactional method or a
+            # programmatic region): record who invokes it instead of listing it twice
             by_root[mid]['invoked_by'].append(label_of(idx, mid) + f" [{ekind}]")
             continue
         w = tb.walk(mid, mode='implicit')
@@ -3277,7 +3432,9 @@ def run(app_dir, out_dir, app, commit, rules):
         kinds = sorted({s['kind'] for s in sites if s.get('detail') != 'release'})
         if not kinds:
             continue
-        w = tb.walk(mid)
+        blocks = sorted({(x['line'], x['end']) for x in sites if x['kind'] == 'synchronized-block' and x.get('end')})
+        whole = [x for x in sites if x['kind'] != 'synchronized-block' or not x.get('end')]
+        w = tb.walk(mid, sync_ranges=(blocks if blocks and not whole else None))
         if not w['ops']:
             continue
         s = tb.summarize(w)
