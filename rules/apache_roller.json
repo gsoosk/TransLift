@@ -1,0 +1,16 @@
+{
+ "commit_points": [
+  [
+   "Weblogger",
+   "flush"
+  ],
+  [
+   "Planet",
+   "flush"
+  ],
+  [
+   "JPAPersistenceStrategy",
+   "flush"
+  ]
+ ]
+}

@@ -1,0 +1,61 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 tools/aggregate.py *)",
+      "Bash(python3 tools/app_report.py *)",
+      "Bash(python3 tools/apply_reviews.py *)",
+      "Bash(python3 tools/build_xlsx.py *)",
+      "Bash(python3 tools/check_recall.py *)",
+      "Bash(python3 tools/corpus.py *)",
+      "Bash(python3 tools/dbg.py *)",
+      "Bash(python3 tools/export_blocks.py *)",
+      "Bash(python3 tools/freeze.py *)",
+      "Bash(python3 tools/make_batches.py *)",
+      "Bash(python3 tools/near_dupes.py *)",
+      "Bash(python3 tools/probe_repo.py *)",
+      "Bash(python3 tools/regress.py *)",
+      "Bash(python3 tools/review_batch.py *)",
+      "Bash(python3 tools/review_status.py *)",
+      "Bash(python3 tools/sample.py *)",
+      "Bash(python3 tools/search_candidates.py *)",
+      "Bash(python3 tools/show.py *)",
+      "Bash(python3 tools/show_tx.py *)",
+      "Bash(python3 tools/verify_xlsx.py *)",
+      "Bash(tools/run_one.sh *)",
+      "Bash(tools/run_all.sh *)",
+      "Bash(tools/clone_app.sh *)",
+      "Bash(tools/recalc_xlsx.sh *)",
+      "Bash(gh auth status)",
+      "Bash(grep *)",
+      "Bash(ls *)",
+      "Bash(head *)",
+      "Bash(tail *)",
+      "Bash(wc *)",
+      "Bash(cat *)",
+      "Edit(/reviews/**)",
+      "Edit(/rules/**)",
+      "Edit(/corpus/**)"
+    ],
+    "deny": [
+      "Bash(mvn *)",
+      "Bash(./mvnw *)",
+      "Bash(gradle *)",
+      "Bash(./gradlew *)",
+      "Bash(docker *)",
+      "Edit(/clones/**)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PROJECT_DIR}/tools/guard_paths.py\""
+          }
+        ]
+      }
+    ]
+  }
+}

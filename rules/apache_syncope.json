@@ -1,0 +1,6 @@
+{
+ "exclude_paths": [
+  "persistence-neo4j",
+  "fit/"
+ ]
+}

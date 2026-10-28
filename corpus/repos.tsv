@@ -1,0 +1,23 @@
+# App list for the corpus. One row per application; tools read it in this order.
+# source: seed (the original 20) or rule (added by java-repo-scout); status: empty, or dropped.
+slug	repo	name	domain	persistence	stars	source	added	status	notes
+spring-projects_spring-petclinic	spring-projects/spring-petclinic	Spring PetClinic	Vet clinic (sample app)	Spring Data JPA		seed	2026-10-12		
+mybatis_jpetstore-6	mybatis/jpetstore-6	JPetStore 6	E-commerce (sample app)	MyBatis		seed	2026-10-12		
+gothinkster_spring-boot-realworld-example-app	gothinkster/spring-boot-realworld-example-app	RealWorld Conduit	Blog / social	MyBatis		seed	2026-10-12		
+newbee-ltd_newbee-mall	newbee-ltd/newbee-mall	newbee-mall	E-commerce	MyBatis		seed	2026-10-12		
+elunez_eladmin	elunez/eladmin	eladmin	Admin platform	Spring Data JPA + MyBatis		seed	2026-10-12		
+nageoffer_12306	nageoffer/12306	12306	Train ticketing (microservices)	MyBatis-Plus + Redisson		seed	2026-10-12		
+yangzongzhuan_RuoYi-Vue	yangzongzhuan/RuoYi-Vue	RuoYi-Vue	Admin platform	MyBatis		seed	2026-10-12		
+cmu-db_benchbase	cmu-db/benchbase	BenchBase	OLTP benchmarks (TPC-C, SmallBank, ...)	JDBC		seed	2026-10-12		
+macrozheng_mall	macrozheng/mall	mall	E-commerce	MyBatis		seed	2026-10-12		
+apache_roller	apache/roller	Apache Roller	Blog server	JPA (orm.xml, manual tx)		seed	2026-10-12		
+shopizer-ecommerce_shopizer	shopizer-ecommerce/shopizer	Shopizer	E-commerce	Spring Data JPA		seed	2026-10-12		
+linlinjava_litemall	linlinjava/litemall	litemall	E-commerce	MyBatis		seed	2026-10-12		
+jeecgboot_jeecg-boot	jeecgboot/jeecg-boot	jeecg-boot	Low-code platform	MyBatis-Plus		seed	2026-10-12		
+killbill_killbill	killbill/killbill	Kill Bill	Billing & payments	JDBI (custom tx wrapper)		seed	2026-10-12		
+openmrs_openmrs-core	openmrs/openmrs-core	OpenMRS core	Medical records	Hibernate		seed	2026-10-12		
+apache_syncope	apache/syncope	Apache Syncope	Identity management	JPA / Spring Data		seed	2026-10-12		
+BroadleafCommerce_BroadleafCommerce	BroadleafCommerce/BroadleafCommerce	Broadleaf Commerce	E-commerce	JPA / Hibernate		seed	2026-10-12		
+thingsboard_thingsboard	thingsboard/thingsboard	ThingsBoard	IoT platform	Spring Data JPA + JdbcTemplate		seed	2026-10-12		
+apache_fineract	apache/fineract	Apache Fineract	Core banking	Spring Data JPA + JdbcTemplate		seed	2026-10-12		
+dhis2_dhis2-core	dhis2/dhis2-core	DHIS2 core	Health information system	Hibernate + JdbcTemplate		seed	2026-10-12		
