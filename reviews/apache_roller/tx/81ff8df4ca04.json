@@ -1,0 +1,19 @@
+{
+ "key": "81ff8df4ca04",
+ "verdict": "corrected",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "Programmatic region in ScheduledEntriesTask.runTask (app commit point): begins lazily at the first write, wMgr.saveWeblogEntry(entry) in the first loop (ScheduledEntriesTask.java:62), commits at WebloggerFactory.getWeblogger().flush() (line 66). All 12 operations are reached from saveWeblogEntry before this flush; the second loop (lines 70-75, cache invalidation and search reindexing) runs after the commit and touches no listed table.",
+ "effects_add": [
+  {
+   "kind": "search-index",
+   "at": "ScheduledEntriesTask.java:169",
+   "note": "searchMgr.addEntryReIndexOperation schedules a Lucene ReIndexEntryOperation (LuceneIndexManager.java:202-203), run after the commit, outside the transaction."
+  }
+ ],
+ "notes": "CacheManager.invalidate (line 167) only touches in-memory caches, no database.",
+ "chash": "aa78e2eb6fc4",
+ "batch": "apache_roller-0002",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:30:55"
+}

@@ -1,0 +1,11 @@
+{
+ "key": "1072bc347f3d",
+ "verdict": "confirmed",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "JPAMediaFileManagerImpl.updateThumbnail (JPAMediaFileManagerImpl.java:252): the unit begins at strategy.store(mediaFile) (line 265, op 1) and commits at roller.flush() (line 285). strategy.refresh at line 287 runs after the commit, outside the unit, and is correctly left out of the operations table.",
+ "chash": "ae0efc197c7b",
+ "batch": "apache_roller-0001",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-27T23:06:04"
+}

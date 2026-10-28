@@ -1,0 +1,11 @@
+{
+ "key": "8ef7278744b5",
+ "verdict": "confirmed",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "No transaction: GlobalCommentManagement.execute (Struts2 action) only reads WeblogEntryComment (getComments, a runtime-built JPQL against a fixed WeblogEntryComment entity) and RuntimeConfigProperty (via WebloggerRuntimeConfig.getProperty), both through getEntityManager(false); each read auto-commits individually and no write ever opens the lazy JPA transaction.",
+ "chash": "e2dcfe18244b",
+ "batch": "apache_roller-0004",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:56:44"
+}

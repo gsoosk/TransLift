@@ -1,0 +1,11 @@
+{
+ "key": "57bcb63ff995",
+ "verdict": "confirmed",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "PingTargets.delete is the commit-point region: the lazy JPA transaction begins at the first getNamedUpdate executeUpdate in removePingTargetContents (JPAPingTargetManagerImpl.java:67-69), continues through the AutoPing delete and the PingTarget remove, and commits at WebloggerFactory.getWeblogger().flush() (PingTargets.java:169).",
+ "chash": "ba269b8d1ac7",
+ "batch": "apache_roller-0004",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:56:44"
+}

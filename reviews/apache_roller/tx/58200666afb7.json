@@ -1,0 +1,12 @@
+{
+ "key": "58200666afb7",
+ "verdict": "confirmed",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "App commit point in PlanetGroupSubs.saveGroup: the unit begins at the first write, not at method entry -- for a new group at JPAPlanetManagerImpl.saveNewPlanetGroup (PlanetGroupSubs.java:144, persisting PlanetGroup then its parent Planet), for an existing group at JPAPlanetManagerImpl.saveGroup (PlanetGroupSubs.java:49, persisting PlanetGroup only); it commits at flush() on line 52. The getGroup lookup at line 140 runs before that and auto-commits outside the unit.",
+ "notes": "Both branches converge on JPAPersistenceStrategy.store's persist at JPAPersistenceStrategy.java:175, which is why op 1 (rag_group) is correctly conditional without a duplicate; op 2 (rag_planet) only runs on the new-group branch via saveNewPlanetGroup, also conditional.",
+ "chash": "adaf9dbb6ae2",
+ "batch": "apache_roller-0002",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:35:28"
+}

@@ -1,0 +1,15 @@
+{
+ "key": "468afbab4faf",
+ "verdict": "corrected",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "synchronized method PingQueueProcessor.processQueue (PingQueueProcessor.java:79-114) guards ops 1-4. Its only caller, PingQueueTask.runTask, calls it at PingQueueTask.java:139 and then flushes (commits) at line 140, so the lock is held while the lazily-begun JPA transaction is open on every path.",
+ "attrs": {
+  "inside_db_tx": true
+ },
+ "notes": "Per app calibration (reviews/apache_roller/calibration.md): PingQueueTask.runTask is processQueue's only caller and commits right after it, so inside_db_tx must be true, not the extractor's false.",
+ "chash": "aa9ae2b95d83",
+ "batch": "apache_roller-0002",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:30:55"
+}

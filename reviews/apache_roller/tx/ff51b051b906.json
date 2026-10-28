@@ -1,0 +1,11 @@
+{
+ "key": "ff51b051b906",
+ "verdict": "confirmed",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "No transaction: RSDServlet.doGet resolves the weblog (WeblogRequest.getWeblog) via JPAWeblogManagerImpl.getWeblogByHandle; every read goes through JPAPersistenceStrategy.getEntityManager(false), no transaction opens, each read auto-commits. The model passed to rsd.vm (website, absBaseURL) is populated directly (no ModelLoader), and the template only reads plain getters ($website.handle), no further DB access.",
+ "chash": "14e1da48ef16",
+ "batch": "apache_roller-0003",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:44:46"
+}

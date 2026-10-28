@@ -1,0 +1,11 @@
+{
+ "key": "db734ff4613b",
+ "verdict": "confirmed",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "Programmatic region in HitCountProcessingJob.execute (app commit point): begins lazily at the first write reached through incrementHitCount inside the loop (HitCountProcessingJob.java:86-87), commits at WebloggerFactory.getWeblogger().flush() (line 71); release() in the finally block rolls back only if an exception escapes before the flush.",
+ "chash": "1d929ccae836",
+ "batch": "apache_roller-0002",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:30:55"
+}

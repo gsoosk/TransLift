@@ -1,0 +1,11 @@
+{
+ "key": "fec3e9d466d7",
+ "verdict": "confirmed",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "GlobalCommentManagement.update is the Roller commit-point region: the lazy JPA transaction begins at the first write, the removeComment call in the deletes loop (GlobalCommentManagement.java:51, JPAPersistenceStrategy.java:199-200), and commits at WebloggerFactory.getWeblogger().flush() (GlobalCommentManagement.java:91). Only the very first getComment read of the method (before that first write, when the deletes list is non-empty) auto-commits outside the unit; every later getComment call in either loop runs after the transaction is active, so it is inside the unit along with the remove/save writes. CacheManager.invalidate (line 95) runs after the flush, outside the transaction, but touches only in-memory caches, not the database.",
+ "chash": "73b131f7da20",
+ "batch": "apache_roller-0004",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:56:44"
+}

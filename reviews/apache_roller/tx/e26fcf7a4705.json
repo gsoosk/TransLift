@@ -1,0 +1,24 @@
+{
+ "key": "e26fcf7a4705",
+ "verdict": "corrected",
+ "confidence": "medium",
+ "depth": "full",
+ "boundary": "No transaction: PreviewServlet.doGet resolves the weblog and the preview page/template, each read through JPAPersistenceStrategy.getEntityManager(false) auto-committing individually; rendering (renderer.render, PreviewServlet.java:219) then runs the selected Velocity template, which can pull further reads through the loaded PreviewPageModel.",
+ "ops_add": [
+  {
+   "op": "R",
+   "at": "WeblogEntriesLatestPager.java:65",
+   "call": "PreviewPageModel.getWeblogEntriesPager() -> WeblogEntryManager.getWeblogEntryObjectMap -> getWeblogEntries",
+   "reads": [
+    "weblogentry"
+   ],
+   "cond": true,
+   "note": "If the default/weblog theme template is the one selected for preview, it calls '#set($pager = $model.getWeblogEntriesPager())' (themes/basic/weblog.vm:24); PreviewPageModel.getWeblogEntriesPager(String) (PreviewPageModel.java:97-128) falls back to WeblogEntriesLatestPager when no preview-entry anchor is set, whose constructor (WeblogEntriesLatestPager.java:65) calls getEntries() -> JPAWeblogEntryManagerImpl.getWeblogEntryObjectMap (:84) -> getWeblogEntries (JPAWeblogEntryManagerImpl.java:849), a dynamic JPQL query against WeblogEntry (table weblogentry). Which template PreviewServlet.doGet actually selects (PreviewServlet.java:97-144, page/tags/permalink/default) was not individually traced for this entry point, so this is conditional and only one of several possible template-driven paths."
+  }
+ ],
+ "notes": "ModelLoader.loadModels (PreviewServlet.java:180,185) dispatches to Model.init for PreviewPageModel/ConfigModel/UtilitiesModel/PreviewURLModel/MessageModel/CalendarModel/MenuModel (plus SiteModel/PlanetModel for the site-wide weblog). Only the PageModel-derived entries pager was checked against the 'basic' theme's default weblog.vm; other preview page selections (permalink, tags index, css, custom page) were not traced, so confidence is medium.",
+ "chash": "7a4d1a866430",
+ "batch": "apache_roller-0003",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:45:58"
+}

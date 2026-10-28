@@ -1,0 +1,11 @@
+{
+ "key": "47d02930287f",
+ "verdict": "confirmed",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "Programmatic region in ResetHitCountsTask.runTask (app commit point): begins at the bulk UPDATE in resetAllHitCounts (JPAWeblogEntryManagerImpl.java:1387-1388, a getNamedUpdate which itself begins the transaction), commits at WebloggerFactory.getWeblogger().flush() (ResetHitCountsTask.java:133).",
+ "chash": "9ff86905ca67",
+ "batch": "apache_roller-0002",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:30:55"
+}

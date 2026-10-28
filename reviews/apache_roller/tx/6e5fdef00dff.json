@@ -1,0 +1,11 @@
+{
+ "key": "6e5fdef00dff",
+ "verdict": "confirmed",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "No transaction: RequestMappingFilter.doFilter (mapped to /*) calls WeblogRequestMapper.handleRequest -> isWeblog -> JPAWeblogManagerImpl.getWeblogByHandle, which reads through JPAPersistenceStrategy.getEntityManager(false) (JPAPersistenceStrategy.java:244-248): no transaction begins, both reads auto-commit immediately.",
+ "chash": "f53c7d8ba991",
+ "batch": "apache_roller-0003",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:44:46"
+}

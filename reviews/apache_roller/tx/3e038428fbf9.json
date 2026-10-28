@@ -1,0 +1,17 @@
+{
+ "key": "3e038428fbf9",
+ "verdict": "corrected",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "Programmatic region in ThemeManagerImpl.importTheme (app commit point): the template edits (ops 1,2,5-8) accumulate uncommitted until the first flush reached in the per-resource loop (lines 146, 173 or 207), and each loop iteration can commit again at those same lines, so the method is really several linked but separately-committed units rather than one transaction. Op 11 (MediaFile persist) is reached only through the nested regions JPAMediaFileManagerImpl.createThemeMediaFile (key e4c75af7b1af) and updateThumbnail (key 1072bc347f3d), which are already catalogued separately and flush on their own (lines 462 and 514).",
+ "ops_remove": [
+  {
+   "n": 11,
+   "note": "the MediaFile persist at JPAPersistenceStrategy:175 is reached only via createThemeMediaFile (importTheme.java:197/355) and updateThumbnail (called from createThemeMediaFile:248); both are separately catalogued nested region roots (e4c75af7b1af, 1072bc347f3d) with their own flush() at JPAMediaFileManagerImpl.java:462 and :514 -- the walk did not stop at those nested roots."
+  }
+ ],
+ "chash": "c1318c8ba64b",
+ "batch": "apache_roller-0002",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:30:55"
+}

@@ -1,0 +1,12 @@
+{
+ "key": "b8867bf78f76",
+ "verdict": "confirmed",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "No transaction: LoadSaltFilter.doFilter calls RollerSession.getRollerSession (RollerSession.java:62), which runs two auto-committing JPA reads of its own (JPAUserManagerImpl.getUserByUserName -> getUser, RollerSession.java:81/91, both on roller_user) and, only when a principal exists with no cached user and LDAP auto-provisioning is enabled, conditionally calls the explicit region BasicUserAutoProvision.execute (RollerSession.java:90, commits on its own, writes roller_user and userrole); the salt cache put/get after that uses in-memory caches, not the database.",
+ "notes": "The called explicit transaction's tables (roller_user, userrole writes) are correctly folded into this record's header per docs/transaction-kinds.md; shape read-then-write matches the overlap on roller_user between this filter's own reads and BasicUserAutoProvision's write.",
+ "chash": "f165ceeaf501",
+ "batch": "apache_roller-0002",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:35:40"
+}

@@ -1,0 +1,20 @@
+{
+ "key": "31bda541439a",
+ "verdict": "corrected",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "PingTargets.disable is the commit-point region: the lazy JPA transaction begins at strategy.store(getPingTarget()) (PingTargets.java:134) and commits at WebloggerFactory.getWeblogger().flush() (PingTargets.java:135).",
+ "ops_fix": [
+  {
+   "n": 1,
+   "flags_add": [
+    "dirty-check"
+   ],
+   "note": "Same as enable() (sibling action in this class): PingTargets.myPrepare (PingTargets.java:76-90) loads pingTarget via strategy.load/em.find before disable() runs, so the entity is already managed; em.contains(obj) is true and em.persist (line 175) never runs, the real UPDATE pingtarget comes from dirty checking of setAutoEnabled(false) (PingTargets.java:131) at flush()."
+  }
+ ],
+ "chash": "e668bea6ccb4",
+ "batch": "apache_roller-0004",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:56:44"
+}

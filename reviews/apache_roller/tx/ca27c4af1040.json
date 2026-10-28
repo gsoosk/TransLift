@@ -1,0 +1,11 @@
+{
+ "key": "ca27c4af1040",
+ "verdict": "confirmed",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "No transaction: XmlRpcEnabledFilter.doFilter reads the webservices.enableXmlRpc runtime property through WebloggerRuntimeConfig.getProperty -> JPAPropertiesManagerImpl.getProperty -> JPAPersistenceStrategy.load (XmlRpcEnabledFilter.java:51), a single auto-committing read of roller_properties; nothing else in the filter touches the database.",
+ "chash": "1bf9ab374554",
+ "batch": "apache_roller-0002",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:35:40"
+}

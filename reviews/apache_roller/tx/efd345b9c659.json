@@ -1,0 +1,26 @@
+{
+ "key": "efd345b9c659",
+ "verdict": "corrected",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "No transaction: UserDataServlet.doGet only reads. ParsedRequest.getUser (via WeblogRequest) looks up the current user by name, user.hasGlobalPermission checks the admin role, and getUsersStartingWith lists users; all through getEntityManager(false)/named queries, each auto-committing, no write runs.",
+ "ops_remove": [
+  {
+   "n": 4,
+   "note": "getWeblogPermission (JPAUserManagerImpl.java:383-394) only runs on the `perm instanceof WeblogPermission` branch of checkPermission (:362). The only call here is User.hasGlobalPermissions:227 `checkPermission(perm, this)`, where perm = new GlobalPermission(actions) (User.java:226) uses the GlobalPermission(List<String>) constructor (GlobalPermission.java:79); GlobalPermission (extends RollerPermission) is unrelated to WeblogPermission (extends ObjectPermission), so the instanceof check is always false here and this branch is dead on this path."
+  },
+  {
+   "n": 6,
+   "note": "getWeblogByHandle's named-query path (JPAWeblogManagerImpl.java:409), reached only through the dead WeblogPermission branch removed as op 4."
+  },
+  {
+   "n": 7,
+   "note": "getWeblogByHandle's cache-hit load (JPAPersistenceStrategy.java:223), reached only through the same dead WeblogPermission branch as op 4."
+  }
+ ],
+ "notes": "Same checkPermission(GlobalPermission, user) dead-branch issue as UserEdit.save (1a8158849af8), UserEdit.execute (26d7b7387a1a) and UserEdit.firstSave (c4c85532f33f) in this batch; recorded as a systematic problem in reviews/notes/apache_roller-0004.md.",
+ "chash": "e03945bc6187",
+ "batch": "apache_roller-0004",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:56:44"
+}

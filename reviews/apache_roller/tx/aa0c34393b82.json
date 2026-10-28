@@ -1,0 +1,86 @@
+{
+ "key": "aa0c34393b82",
+ "verdict": "corrected",
+ "confidence": "high",
+ "depth": "sampled",
+ "boundary": "WebloggerImpl.initialize (WebloggerImpl.java:335): JPAPersistenceStrategy begins the shared EM transaction lazily at the first write. getPropertiesManager().initialize() (line 342) reads roller_properties before any write (op 2, outside the unit) then writes it (op 5, starts the unit). getMediaFileManager().initialize() (line 346) can call JPAMediaFileManagerImpl.upgradeFileStorage, already cataloged as its own region root (key 7e7b49c8e380) that itself calls the separate roots createMediaFile (6e64f7049df5), updateThumbnail (1072bc347f3d) and upgradeUploadsDir (b8c06dc2dbe9): each has its own roller.flush() commit points, so when the autoUpgrade branch runs it ends this unit early and its operations belong to those roots, not this one. The ping-system block (lines 67-84) and this root's own flush() (line 89) are this root's; the operations reached only via upgradeFileStorage are removed below.",
+ "ops_remove": [
+  {
+   "n": 2,
+   "note": "JPAPropertiesManagerImpl.getProperties (JPAPropertiesManagerImpl.java:114) runs through getEntityManager(false) before the first write (op 5) lazily begins the unit (app fact); it auto-commits on its own."
+  },
+  {
+   "n": 7,
+   "note": "JPAWeblogManagerImpl.getWeblogByHandle (JPAWeblogManagerImpl.java:409) is reached only via JPAMediaFileManagerImpl.upgradeFileStorage:737, a separately cataloged region root (key 7e7b49c8e380)."
+  },
+  {
+   "n": 10,
+   "note": "getWeblogPermissions (JPAUserManagerImpl.java:533) is reached only via getWeblogUsers, called from upgradeFileStorage:745 (root 7e7b49c8e380)."
+  },
+  {
+   "n": 11,
+   "note": "getMediaFileDirectoryByName (JPAMediaFileManagerImpl.java:442) is reached only via getDefaultMediaFileDirectory, called from upgradeFileStorage:758 (root 7e7b49c8e380)."
+  },
+  {
+   "n": 12,
+   "note": "JPAPersistenceStrategy.load (:223, Weblog) is the cache-hit path of getWeblogByHandle inside upgradeFileStorage (root 7e7b49c8e380)."
+  },
+  {
+   "n": 13,
+   "note": "MediaFileDirectory persist is createDefaultMediaFileDirectory, called from upgradeFileStorage:762, which flushes at line 380 - a separate commit belonging to root 7e7b49c8e380."
+  },
+  {
+   "n": 14,
+   "note": "MediaFile persist is JPAMediaFileManagerImpl.createMediaFile (JPAMediaFileManagerImpl.java:217), itself a separately cataloged region root (key 6e64f7049df5), reached via upgradeUploadsDir (root b8c06dc2dbe9) from upgradeFileStorage:767."
+  },
+  {
+   "n": 15,
+   "note": "The refresh at createMediaFile:217 runs after that root's own flush() (line 216) and belongs to root 6e64f7049df5, not this one."
+  },
+  {
+   "n": 16,
+   "note": "WeblogPermission.getUser -> getUserByUserName query (JPAUserManagerImpl.java:199) is reached only via getWeblogUsers, called from upgradeFileStorage:745 (root 7e7b49c8e380)."
+  },
+  {
+   "n": 17,
+   "note": "getRoles (JPAUserManagerImpl.java:595) is reached only via User.hasGlobalPermission, called from upgradeFileStorage:750 (root 7e7b49c8e380)."
+  },
+  {
+   "n": 18,
+   "note": "getWeblogPermission (JPAUserManagerImpl.java:390) is reached only via checkPermission from the same hasGlobalPermission check inside upgradeFileStorage:750 (root 7e7b49c8e380)."
+  },
+  {
+   "n": 19,
+   "note": "Weblog persist is roller.getWeblogManager().saveWeblog(weblog) inside createMediaFile (JPAMediaFileManagerImpl.java:892), belonging to root 6e64f7049df5, reached via upgradeFileStorage/upgradeUploadsDir."
+  },
+  {
+   "n": 20,
+   "note": "Cache-hit find User (JPAPersistenceStrategy.java:223) is the same getUserByUserName chain as op 16, reached only via upgradeFileStorage (root 7e7b49c8e380)."
+  },
+  {
+   "n": 21,
+   "note": "find RuntimeConfigProperty (JPAPersistenceStrategy.java:223) is FileContentManagerImpl.canSave's WebloggerRuntimeConfig.getProperty lookup (FileContentManagerImpl.java:194/207), called from createMediaFile:881 inside the upgradeFileStorage/upgradeUploadsDir branch (root 6e64f7049df5)."
+  }
+ ],
+ "ops_fix": [
+  {
+   "n": 5,
+   "writes": [
+    "roller_properties"
+   ],
+   "note": "saveProperties loops over a Map<String, RuntimeConfigProperty> (JPAPropertiesManagerImpl.java:142/172), so the Object argument to strategy.store is always a RuntimeConfigProperty -> roller_properties, not unknown."
+  },
+  {
+   "n": 9,
+   "writes": [
+    "autoping"
+   ],
+   "note": "removeAutoPings(Collection<AutoPing>) passes the AutoPing list straight to strategy.removeAll (JPAAutoPingManagerImpl.java:86), so the table is autoping, not unknown."
+  }
+ ],
+ "notes": "Reviewed at sampled depth given 21 operations and heavy nesting; checked every distinct table and traced every write plus the loops. After removing the upgradeFileStorage branch (13 ops) and the pre-write read, the own unit of WebloggerImpl.initialize covers only ops 1, 3, 4, 5, 6, 8, 9 (autoping, roller_tasklock, pingtarget, roller_properties).",
+ "chash": "f139b33a23e6",
+ "batch": "apache_roller-0001",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-27T23:06:04"
+}

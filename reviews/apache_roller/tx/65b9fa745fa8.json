@@ -1,0 +1,11 @@
+{
+ "key": "65b9fa745fa8",
+ "verdict": "confirmed",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "App commit point in PlanetGroups.delete: the region begins at the first write inside JPAPlanetManagerImpl.deleteGroup -- strategy.store(planet) at PlanetGroups.java:77 (via line 95) and strategy.remove(group) (via line 97) -- and commits at flush() on line 78; there is no code before the call that reaches the database.",
+ "chash": "b108b1e69d7e",
+ "batch": "apache_roller-0002",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:35:28"
+}

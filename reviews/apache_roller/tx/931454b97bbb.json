@@ -1,0 +1,61 @@
+{
+ "key": "931454b97bbb",
+ "verdict": "corrected",
+ "confidence": "medium",
+ "depth": "sampled",
+ "boundary": "JPAWeblogManagerImpl.removeWeblogContents (JPAWeblogManagerImpl.java:124) holds three sequential units, not one, each ending at its own strategy.flush(): unit A begins at the tag-removal loop (line 140, op 8) and runs through the auto-ping/template/folder removals; it calls mfmgr.removeAllFiles (line 133), which reaches JPAMediaFileManagerImpl.removeMediaFileDirectory, a separately cataloged region root (key 570c32444b0e) with its own two flush() calls - its operations (MediaFile/MediaFileDirectory reads and removes) belong to that root, not this one, and its flushes already commit unit A's pending writes before this method's own flush() at line 138 runs. Unit B begins at the first comment/entry removal inside the entries loop (line 145 onward) and commits at line 147. Unit C begins at the permission revocations (line 155 onward) and commits at the final flush (line 161). The read at line 143 (all weblog entries) runs before unit B's first write and auto-commits separately.",
+ "ops_remove": [
+  {
+   "n": 25,
+   "note": "MediaFile remove (JPAMediaFileManagerImpl.java:365, inside removeMediaFileDirectory) belongs to the separately cataloged region root key 570c32444b0e, reached via removeAllFiles at line 133."
+  },
+  {
+   "n": 26,
+   "note": "MediaFileDirectory remove (JPAMediaFileManagerImpl.java:373) belongs to root 570c32444b0e, same call chain as op 25."
+  },
+  {
+   "n": 27,
+   "note": "getMediaFileDirectoryByName (JPAMediaFileManagerImpl.java:442) is getDefaultMediaFileDirectory's lookup inside removeAllFiles, reached before root 570c32444b0e's own unit; it belongs to that call, not this root."
+  },
+  {
+   "n": 6,
+   "note": "refQuery.getResultList() (JPAWeblogManagerImpl.java:143, all weblog entries) runs before the first write of unit B (the entries loop starting at line 144) and auto-commits separately with FlushModeType.COMMIT (app fact)."
+  }
+ ],
+ "ops_fix": [
+  {
+   "n": 9,
+   "entity": "WeblogEntryTagAggregate",
+   "reads": [
+    "roller_weblogentrytagagg"
+   ],
+   "note": "getTags builds a dynamic JPQL query 'FROM WeblogEntryTagAggregate w WHERE w.weblog.id = ?1' (JPAWeblogEntryManagerImpl.java:1093/1114); the result entity is WeblogEntryTagAggregate -> roller_weblogentrytagagg, not Weblog/weblog as listed - the extractor appears to have misread the dynamic query string."
+  },
+  {
+   "n": 11,
+   "writes": [
+    "pingqueueentry"
+   ],
+   "note": "the loop at JPAWeblogManagerImpl.java:162-164 iterates queueEntries, a List<PingQueueEntry> fetched at line 162 (op 3), so the Object argument to strategy.remove is always a PingQueueEntry -> pingqueueentry, not unknown."
+  }
+ ],
+ "ops_add": [
+  {
+   "op": "W",
+   "at": "JPAWeblogEntryManagerImpl:517",
+   "call": "strategy.remove(tag)",
+   "writes": [
+    "roller_weblogentrytag"
+   ],
+   "api": "jpa",
+   "loop": true,
+   "cond": true,
+   "note": "removeWeblogEntryTag removes the tag itself after updateTagCount (JPAWeblogEntryManagerImpl.java:513-518); the extractor's code excerpt for this method shows no DB marker on this line even though it is reached from removeWeblogEntry's tag loop (line 274) inside unit B. Genuine miss, not a duplicate of op 8 (a different call site, JPAWeblogManagerImpl.java:140)."
+  }
+ ],
+ "notes": "Reviewed at sampled depth (35 ops, 146 methods walked): checked the root, the three-unit boundary, every distinct table, and all writes plus the two misresolved reads. The initial tagQuery.getResultList() read (JPAWeblogManagerImpl.java:134, WeblogEntryTag.getByWeblog) is also missing from the operations table, but it runs before unit A's first write and would be excluded from the boundary anyway, so it is not added.",
+ "chash": "6d007c7613d4",
+ "batch": "apache_roller-0001",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-27T23:06:04"
+}

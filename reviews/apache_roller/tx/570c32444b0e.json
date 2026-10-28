@@ -1,0 +1,12 @@
+{
+ "key": "570c32444b0e",
+ "verdict": "confirmed",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "JPAMediaFileManagerImpl.removeMediaFileDirectory (JPAMediaFileManagerImpl.java:906) is two sequential units, not one: the first begins at strategy.remove(mf) in the loop (line 916, op 1) and commits at roller.flush() (line 922); the second begins at strategy.remove(dir) (line 924, op 2) and commits at the method's second roller.flush() (line 927). Each commits independently, the same pattern as DatabaseInstaller.upgradeTo400's multiple con.commit() calls.",
+ "notes": "Both operations and their tables (roller_mediafile, roller_mediafiledir) are correct; only the single-unit boundary description needed clarifying to two units.",
+ "chash": "4a4fd4437965",
+ "batch": "apache_roller-0001",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-27T23:06:19"
+}

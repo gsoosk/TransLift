@@ -1,0 +1,33 @@
+{
+ "key": "b6053ea1a124",
+ "verdict": "corrected",
+ "confidence": "medium",
+ "depth": "full",
+ "boundary": "No transaction: PageServlet.doGet resolves the weblog, template and (optionally) entry/category/tags, each read through JPAPersistenceStrategy.getEntityManager(false) auto-committing individually; rendering (renderer.render, PageServlet.java:511) then runs the Velocity page template, which pulls further reads through the loaded PageModel.",
+ "ops_fix": [
+  {
+   "n": 1,
+   "reads": [
+    "roller_weblogentrytagagg"
+   ],
+   "note": "getTagComboExists builds 'SELECT DISTINCT w.name FROM WeblogEntryTagAggregate w WHERE ...' (JPAWeblogEntryManagerImpl.java:671-672, executed at :700); the JPQL entity name is static text, mapped by WeblogEntryTagAggregate.orm.xml:12 to table roller_weblogentrytagagg, so the table is resolvable, not unknown."
+  }
+ ],
+ "ops_add": [
+  {
+   "op": "R",
+   "at": "WeblogEntriesLatestPager.java:65",
+   "call": "PageModel.getWeblogEntriesPager() -> WeblogEntryManager.getWeblogEntryObjectMap -> getWeblogEntries",
+   "reads": [
+    "weblogentry"
+   ],
+   "cond": true,
+   "note": "The default weblog theme template calls '#set($pager = $model.getWeblogEntriesPager())' (themes/basic/weblog.vm:24); PageModel.getWeblogEntriesPager() (PageModel.java:214-304) returns WeblogEntriesPermalinkPager/DayPager/MonthPager/LatestPager depending on the request; the default case, WeblogEntriesLatestPager, calls getEntries() in its constructor (WeblogEntriesLatestPager.java:65), which calls JPAWeblogEntryManagerImpl.getWeblogEntryObjectMap (:84) -> getWeblogEntries (JPAWeblogEntryManagerImpl.java:849), a dynamic JPQL query against WeblogEntry (table weblogentry). Which pager variant runs depends on the request and theme; only the default theme/latest-pager path was traced."
+  }
+ ],
+ "notes": "ModelLoader.loadModels (PageServlet.java:471,476) dispatches by class name to Model.init for PageModel/ConfigModel/UtilitiesModel/URLModel/MessageModel/CalendarModel/MenuModel (and SiteModel/PlanetModel if site-wide); only PageModel's entries pager was traced against the shipped 'basic' theme. Other themes, the permalink/day/month pager variants, and CalendarModel/MenuModel were not individually checked, so confidence is medium.",
+ "chash": "1dab173fcf26",
+ "batch": "apache_roller-0003",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:45:58"
+}

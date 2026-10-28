@@ -1,0 +1,12 @@
+{
+ "key": "11fbbb1a491d",
+ "verdict": "confirmed",
+ "confidence": "medium",
+ "depth": "full",
+ "boundary": "DatabaseInstaller.upgradeTo400 (DatabaseInstaller.java:293-730) is five sequential JDBC units sharing one connection, not one transaction: (1) script run + parentid population, ops 29,1-4, commits ~line 369; (2) path-column population, ops 5-14, commits ~line 520; (3) planet group 'external'->'all' merge, ops 15-19, commits ~line 577; (4) local feed-url rewrite, ops 20-22, commits ~line 626; (5) comment plugin/autoformat migration, ops 23-28, commits ~line 718. Each `catch` block only reports an error; a failure in one unit does not roll back the ones already committed. updateDatabaseVersion (op 30, DatabaseInstaller.java:946-955) runs afterward with no visible commit of its own.",
+ "notes": "All 30 operations and their tables check out against the code and SQL shown (JDBC PreparedStatement text read verbatim); nothing to fix on the ops themselves. Most branches in units 1-5 only execute when getAutoCommit() is false and the pre-4.0 schema state matches (e.g. the planet-group merge only touches rows if rag_group rows named 'all'/'external' exist). Op 29 (SQLScriptRunner.java:120->416, unknown table) is the same statement site as the separate region 72e380159c78 SQLScriptRunner.runScript; its table is unresolved runtime SQL from a migration script file. Confidence medium because op 30's commit status after line 718 is not visible in this method, and because treating five sequential commit points under one root as a single boundary is a judgment call the rules do not spell out for same-root sequential commits (as opposed to calls into another committing root).",
+ "chash": "e032ef1aa260",
+ "batch": "pilot-apache_roller-0001",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-27T22:25:30"
+}

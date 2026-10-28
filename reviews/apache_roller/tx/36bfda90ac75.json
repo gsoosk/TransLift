@@ -1,0 +1,20 @@
+{
+ "key": "36bfda90ac75",
+ "verdict": "corrected",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "App commit point in PlanetConfig.save: the region really begins at the first write inside the loop (JPAPropertiesManagerImpl.saveProperties -> strategy.store, PlanetConfig.java:85) rather than at method entry, since reads before it (none here besides in-memory property lookups) auto-commit; it commits at WebloggerFactory.getWeblogger().flush() on line 86.",
+ "ops_fix": [
+  {
+   "n": 1,
+   "writes": [
+    "roller_properties"
+   ],
+   "note": "strategy.store(prop) persists Object, but the only caller loops over Map<String, RuntimeConfigProperty> properties (JPAPropertiesManagerImpl.java:107-109), and RuntimeConfigProperty maps to roller_properties (RuntimeConfigProperty.orm.xml, weblogger package: <table name=\"roller_properties\"/>)."
+  }
+ ],
+ "chash": "1a66322a6264",
+ "batch": "apache_roller-0002",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:35:28"
+}

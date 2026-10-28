@@ -1,0 +1,12 @@
+{
+ "key": "72e380159c78",
+ "verdict": "confirmed",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "SQLScriptRunner.runScript loops over SQL commands and, for each one, executes it (SQLScriptRunner.java:36) then commits immediately (line 38, guarded by `if (!con.getAutoCommit())`), so each loop pass is its own single-statement unit rather than one transaction spanning the whole script; the extracted op and its `loop` flag already reflect this correctly.",
+ "notes": "Per app calibration, op 1's unknown-table write is the same statement reached from DatabaseInstaller.upgradeTo400 (key 11fbbb1a491d, op 29); the table is unresolvable because it comes from a runtime SQL command read from a script file.",
+ "chash": "99493527a23d",
+ "batch": "apache_roller-0002",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:35:28"
+}

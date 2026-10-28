@@ -1,0 +1,11 @@
+{
+ "key": "6996b392608f",
+ "verdict": "confirmed",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "No transaction: CommentAuthenticatorServlet.doGet calls the configured CommentAuthenticator.getHtml (LdapCommentAuthenticator here), which resolves the request's weblog locale via CommentAuthenticatorUtils.getLocale -> JPAWeblogManagerImpl.getWeblogByHandle; both reads go through JPAPersistenceStrategy.getEntityManager(false) (JPAPersistenceStrategy.java:244-248), no transaction begins, each read auto-commits.",
+ "chash": "efa6828aea9b",
+ "batch": "apache_roller-0003",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:44:46"
+}

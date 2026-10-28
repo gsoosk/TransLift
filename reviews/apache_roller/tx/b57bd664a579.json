@@ -1,0 +1,11 @@
+{
+ "key": "b57bd664a579",
+ "verdict": "confirmed",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "JPAThreadManagerImpl.registerLease (JPAThreadManagerImpl.java:62): the pre-write read getTaskLockByName (line 73) runs with no transaction open and auto-commits separately (already excluded). The unit begins at the executeUpdate on TaskLock (line 111, op 1) and commits at strategy.flush() (line 113).",
+ "chash": "09b2f43e0fb7",
+ "batch": "apache_roller-0001",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-27T23:06:04"
+}

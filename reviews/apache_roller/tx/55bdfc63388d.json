@@ -1,0 +1,11 @@
+{
+ "key": "55bdfc63388d",
+ "verdict": "confirmed",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "No transaction: ResourceServlet.doGet resolves the weblog (WeblogRequest.getWeblog) and, only if the resource is not found in the weblog's shared theme, falls back to JPAMediaFileManagerImpl.getMediaFileByOriginalPath (ResourceServlet.java:95-96); every read goes through JPAPersistenceStrategy.getEntityManager(false), no transaction opens, each read auto-commits. The file bytes come from FileContentManagerImpl (filesystem), not the database.",
+ "chash": "8544475d848a",
+ "batch": "apache_roller-0003",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:44:46"
+}

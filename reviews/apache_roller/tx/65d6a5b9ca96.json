@@ -1,0 +1,11 @@
+{
+ "key": "65d6a5b9ca96",
+ "verdict": "confirmed",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "No transaction: CreateWeblog.execute (Struts2 action) only reads RuntimeConfigProperty (site.allowUserWeblogCreation, groupblogging.enabled) and, conditionally, WeblogPermission (getWeblogPermissions, the one-blog-limit check), both through getEntityManager(false); each read auto-commits, no write runs.",
+ "chash": "caf3015a254c",
+ "batch": "apache_roller-0004",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:56:44"
+}

@@ -1,0 +1,20 @@
+{
+ "key": "b2667ee4eef5",
+ "verdict": "corrected",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "GlobalConfig.save is the commit-point region: FrontpageSettings.resolveWeblog's read (and the inner getWeblogByHandle read it triggers) run before any write, so they auto-commit outside the unit under JPAPersistenceStrategy's lazy begin; the lazy transaction actually begins at JPAPropertiesManagerImpl.saveProperties' first strategy.store(prop) call (GlobalConfig.java:143) and commits at WebloggerFactory.getWeblogger().flush() (GlobalConfig.java:144). invalidateRenderedContent (line 149) runs after the flush, outside the transaction, and only clears in-memory caches.",
+ "ops_fix": [
+  {
+   "n": 2,
+   "writes": [
+    "roller_properties"
+   ],
+   "note": "JPAPropertiesManagerImpl.saveProperties (JPAPropertiesManagerImpl.java:142-149) is called only with the Map<String, RuntimeConfigProperty> built by getProperties/GlobalConfig.save; its loop variable is declared Object (line 260) so the extractor lost the static type, but the map's value type is RuntimeConfigProperty, mapped to roller_properties (RuntimeConfigProperty.orm.xml:25, weblogger package)."
+  }
+ ],
+ "chash": "e462da49e79c",
+ "batch": "apache_roller-0004",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:56:44"
+}

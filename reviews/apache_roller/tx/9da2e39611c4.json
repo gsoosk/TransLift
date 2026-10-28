@@ -1,0 +1,12 @@
+{
+ "key": "9da2e39611c4",
+ "verdict": "confirmed",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "App commit point in SyncWebsitesTask.runTask: really three separately-committed units chained in one method body -- the \"all\" PlanetGroup creation (saveGroup, line 162) commits at the flush on line 96 if it runs; each loop pass over getWeblogs (line 168) saves/updates a subscription and commits at the per-iteration flush on line 96; the final subscription deletions (deleteSubscription, line 229) plus the closing saveGroup commit at the method's last flush, line 124. All 6 listed operations still belong to this method; none run after its last flush, so the operation list and tables are unchanged.",
+ "notes": "Same splitting pattern the app calibration already notes for DatabaseInstaller.upgradeTo400 (multiple con.commit()/flush() points inside one root): here it is three chained units rather than one, but the extractor's single catalogued root still covers all the real operations, so nothing is added or removed.",
+ "chash": "7f7b04180915",
+ "batch": "apache_roller-0002",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:35:28"
+}

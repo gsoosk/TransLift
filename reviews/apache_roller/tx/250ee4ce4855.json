@@ -1,0 +1,11 @@
+{
+ "key": "250ee4ce4855",
+ "verdict": "confirmed",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "FrontpageSettings.applyInitial (FrontpageSettings.java:84), called from FrontpageSetup.save: the unit begins at the pessimistic-locking find inside compareAndSetProperty (line 97, op 1) which lazily begins the EM transaction, continues through saveProperty's persist (line 103, op 2), and commits at WebloggerFactory.getWeblogger().flush() (line 105). The plain read mgr.getProperty(HANDLE_PROPERTY) at line 93 runs before the unit begins and auto-commits outside it; it is already excluded from the operations table.",
+ "chash": "4e6cd167dcbd",
+ "batch": "apache_roller-0001",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-27T23:06:04"
+}

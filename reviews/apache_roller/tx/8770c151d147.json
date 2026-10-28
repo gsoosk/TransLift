@@ -1,0 +1,11 @@
+{
+ "key": "8770c151d147",
+ "verdict": "confirmed",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "No transaction: GlobalCommentManagement.query (Struts2 action) only reads WeblogEntryComment (getComments called twice, via loadComments and directly, same statement site) and RuntimeConfigProperty, both through getEntityManager(false); each read auto-commits individually and no write ever opens the lazy JPA transaction.",
+ "chash": "7a67960ffa68",
+ "batch": "apache_roller-0004",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:56:44"
+}

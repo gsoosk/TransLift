@@ -1,0 +1,33 @@
+{
+ "key": "ca7103a082c2",
+ "verdict": "corrected",
+ "confidence": "medium",
+ "depth": "full",
+ "boundary": "No transaction: PageServlet.doPost sets skipCache and calls doGet (PageServlet.java:568) directly (not through the proxy, but there is no proxy here anyway); doGet resolves the weblog, template and (optionally) entry/category/tags, each read through JPAPersistenceStrategy.getEntityManager(false) auto-committing individually; rendering afterwards runs the Velocity page template, which pulls further reads through the loaded PageModel.",
+ "ops_fix": [
+  {
+   "n": 1,
+   "reads": [
+    "roller_weblogentrytagagg"
+   ],
+   "note": "getTagComboExists builds 'SELECT DISTINCT w.name FROM WeblogEntryTagAggregate w WHERE ...' (JPAWeblogEntryManagerImpl.java:671-672, executed at :700); the JPQL entity name is static text, mapped by WeblogEntryTagAggregate.orm.xml:12 to table roller_weblogentrytagagg, so the table is resolvable, not unknown."
+  }
+ ],
+ "ops_add": [
+  {
+   "op": "R",
+   "at": "WeblogEntriesLatestPager.java:65",
+   "call": "PageModel.getWeblogEntriesPager() -> WeblogEntryManager.getWeblogEntryObjectMap -> getWeblogEntries",
+   "reads": [
+    "weblogentry"
+   ],
+   "cond": true,
+   "note": "Same rendering path as PageServlet.doGet (key b6053ea1a124): the default weblog theme template calls '#set($pager = $model.getWeblogEntriesPager())' (themes/basic/weblog.vm:24); PageModel.getWeblogEntriesPager() (PageModel.java:214-304) returns WeblogEntriesPermalinkPager/DayPager/MonthPager/LatestPager depending on the request; the default case, WeblogEntriesLatestPager, calls getEntries() in its constructor (WeblogEntriesLatestPager.java:65), which calls JPAWeblogEntryManagerImpl.getWeblogEntryObjectMap (:84) -> getWeblogEntries (JPAWeblogEntryManagerImpl.java:849), a dynamic JPQL query against WeblogEntry (table weblogentry)."
+  }
+ ],
+ "notes": "Same analysis as b6053ea1a124 since doPost is a thin wrapper around doGet. ModelLoader.loadModels dispatches by class name to Model.init for PageModel/ConfigModel/UtilitiesModel/URLModel/MessageModel/CalendarModel/MenuModel (and SiteModel/PlanetModel if site-wide); only PageModel's entries pager was traced against the shipped 'basic' theme, so confidence is medium.",
+ "chash": "71c268783ec9",
+ "batch": "apache_roller-0003",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:45:58"
+}

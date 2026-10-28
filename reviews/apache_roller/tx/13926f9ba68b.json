@@ -1,0 +1,23 @@
+{
+ "key": "13926f9ba68b",
+ "verdict": "corrected",
+ "confidence": "medium",
+ "depth": "full",
+ "boundary": "No transaction: PlanetFeedServlet.doGet puts the PlanetManager itself into the Velocity model (model.put(\"planet\", planet), PlanetFeedServlet.java:103) and, only when a 'group' request parameter is present, resolves it via planet.getWeblogger/getGroup (lines 96-100); every read goes through JPAPersistenceStrategy.getEntityManager(false), no transaction opens, each auto-commits. Rendering (renderer.render, line 178) then runs templates/planet/planetrss.vm, which calls $planet methods directly by reflection.",
+ "ops_add": [
+  {
+   "op": "R",
+   "at": "JPAPlanetManagerImpl.java:340",
+   "call": "Planet.getEntries, invoked by templates/planet/planetrss.vm:32 or :35",
+   "reads": [
+    "rag_entry"
+   ],
+   "note": "planetrss.vm:32 ('#set($entries = $planet.getEntries($group, 0, $entryCount))') or, when no group parameter was given, :34-35 ('$planet.getGroup($planet.getWeblogger(\"default\"), \"all\")' then '$planet.getEntries($all, 0, $entryCount)') always runs during rendering. JPAPlanetManagerImpl.getEntries(PlanetGroup,...) (JPAPlanetManagerImpl.java:299-340) builds 'SELECT e FROM SubscriptionEntry e JOIN e.subscription.groups g WHERE ...' and runs it at :340; SubscriptionEntry.orm.xml:25 maps the entity to table rag_entry. This whole read was missed because the extractor does not follow Velocity-reflection calls on an object placed directly in the model."
+  }
+ ],
+ "notes": "The template's else-branch (planetrss.vm:34, when no ?group= parameter) calls $planet.getWeblogger(\"default\") and $planet.getGroup(...) itself -- the same two calls as ops 1 and 2, which the Java code (PlanetFeedServlet.java:95-101) only makes when ?group= is present. So across all requests one of the two call sites for ops 1/2 always runs; they are not purely conditional-and-sometimes-skipped the way the 'conditional' flag suggests, just conditional on which path makes the call. Left the flags as the extractor set them (accurate for the Java-code path) rather than guess at a combined semantics.",
+ "chash": "d3a6acf9a75a",
+ "batch": "apache_roller-0003",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:45:58"
+}

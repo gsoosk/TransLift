@@ -1,0 +1,18 @@
+{
+ "key": "caac190eb887",
+ "verdict": "corrected",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "CommentServlet.doPost, programmatic region: the unit begins lazily at the first write, JPAWeblogEntryManagerImpl.saveComment (called at CommentServlet.java:357), which persists the comment and, via saveWeblog, the weblog; it commits at WebloggerFactory.getWeblogger().flush() (CommentServlet.java:358). Everything before line 357 (throttle check, validation, the WebloggerRuntimeConfig.getProperty read) and everything after line 358 (email notification, search-index updates, cache invalidation) runs outside this unit.",
+ "ops_remove": [
+  {
+   "n": 2,
+   "note": "WebloggerRuntimeConfig.getProperty('users.comments.plugins') is called at CommentServlet.java:254-255, well before the first write at :357 that lazily begins the transaction (JPAPersistenceStrategy.getEntityManager(true), JPAPersistenceStrategy.java:244-246); per app calibration this read goes through getEntityManager(false) and auto-commits outside the unit. Also not inside any loop (CommentServlet.java:253-255), so the 'loop' flag was wrong too, moot once removed."
+  }
+ ],
+ "notes": "Both remaining writes (comment, weblog) occur inside the single lazily-begun transaction before the flush() commit, so the shape is multi-write (2 writes) not read-then-write.",
+ "chash": "9763ed146aa3",
+ "batch": "apache_roller-0003",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:44:46"
+}

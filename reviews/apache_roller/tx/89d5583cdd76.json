@@ -1,0 +1,11 @@
+{
+ "key": "89d5583cdd76",
+ "verdict": "confirmed",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "No transaction: GlobalConfig.execute (Struts2 action) only reads RuntimeConfigProperty (users.comments.plugins) via getEntityManager(false); the statement auto-commits, no write ever runs.",
+ "chash": "da685e3f52fb",
+ "batch": "apache_roller-0004",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:56:44"
+}

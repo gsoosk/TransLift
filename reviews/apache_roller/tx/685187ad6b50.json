@@ -1,0 +1,13 @@
+{
+ "key": "685187ad6b50",
+ "verdict": "corrected",
+ "confidence": "high",
+ "depth": "full",
+ "subkind": "web/read-only",
+ "boundary": "No transaction ever commits: GlobalCommentManagement.delete's writes (em.remove on each matching comment, JPAPersistenceStrategy.java:199-201; em.persist on the comment's weblog via saveWeblog, JPAPersistenceStrategy.java:171-178/221-225) start the lazy JPA transaction but no code on this path ever calls Weblogger.flush()/JPAPersistenceStrategy.flush() (JPAWeblogEntryManagerImpl.removeComment, lines 170-176, has no flush). PersistenceSessionFilter.doFilter's finally (app/src/main/java/org/apache/roller/weblogger/ui/core/filters/PersistenceSessionFilter.java:49-67, mapped to /*) calls release() at the end of the request, which rolls back and closes the EntityManager, so the pending remove/persist are discarded and never reach the database. Only the two reads (getComments, the RuntimeConfigProperty lookup) actually run as SQL.",
+ "notes": "Matches calibration.md:23 explicitly for this key: no flush() on any path means the bulk delete never commits (em.remove at op 2 and em.persist at op 3 are staged but rolled back by PersistenceSessionFilter.release() at request end), so the shape is corrected from multi-write to read-only even though ops 2 and 3 remain in the code path.",
+ "chash": "687e71255788",
+ "batch": "apache_roller-0004",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:57:10"
+}

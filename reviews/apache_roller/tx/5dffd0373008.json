@@ -1,0 +1,18 @@
+{
+ "key": "5dffd0373008",
+ "verdict": "corrected",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "JPAMediaFileManagerImpl.updateMediaFile(Weblog, MediaFile) (JPAMediaFileManagerImpl.java:297): the unit begins at strategy.store(mediaFile) (line 301, op 1) and commits at roller.flush() (line 303). strategy.refresh (line 305) and roller.getWeblogManager().saveWeblog(weblog) (line 306, op 2) run after the commit, with no transaction open, outside this unit.",
+ "ops_remove": [
+  {
+   "n": 2,
+   "note": "roller.getWeblogManager().saveWeblog(weblog) (JPAMediaFileManagerImpl.java:306) runs after roller.flush() at line 303 commits the unit; its persist starts a new, separate unit of work that this method never commits itself."
+  }
+ ],
+ "notes": "Shape becomes single-write (one persist of MediaFile) after removing the post-commit Weblog write.",
+ "chash": "2f260b278d1a",
+ "batch": "apache_roller-0001",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-27T23:06:04"
+}

@@ -1,0 +1,20 @@
+{
+ "key": "b0a827893e1b",
+ "verdict": "corrected",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "No transaction: MediaResourceServlet.doGet resolves the weblog (WeblogRequest.getWeblog -> JPAWeblogManagerImpl.getWeblogByHandle) and loads the media file (MediaFileManager.getMediaFile); every read goes through JPAPersistenceStrategy.getEntityManager(false), no transaction begins, each read auto-commits.",
+ "ops_fix": [
+  {
+   "n": 1,
+   "reads": [
+    "roller_mediafile"
+   ],
+   "note": "doGet calls mfMgr.getMediaFile(resourceRequest.getResourceId(), true) (MediaResourceServlet.java:60-61), a String+boolean argument pair that resolves to the overload MediaFileManager.getMediaFile(String id, boolean includeContent) (JPAMediaFileManagerImpl.java:398-401), which loads via strategy.load(MediaFile.class, id) -> JPAPersistenceStrategy.load (JPAPersistenceStrategy.java:221-224), not the getMediaFile(Weblog weblog, String id) overload the extractor matched (JPAMediaFileManagerImpl.java:349-369, named query at :365) by argument count only; the table (roller_mediafile) happens to be the same but the real call site is JPAPersistenceStrategy.java:223. The 'includeContent' branch (:402-419) only loads bytes from FileContentManagerImpl, which reads the filesystem, not the database."
+  }
+ ],
+ "chash": "31fcf6d668d1",
+ "batch": "apache_roller-0003",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:45:58"
+}

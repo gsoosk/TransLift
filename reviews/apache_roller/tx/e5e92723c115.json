@@ -1,0 +1,24 @@
+{
+ "key": "e5e92723c115",
+ "verdict": "corrected",
+ "confidence": "medium",
+ "depth": "full",
+ "boundary": "No transaction: SearchServlet.doGet only reads (getWeblogByHandle, getTemplateByAction, the RuntimeConfigProperty lookup in isSiteWideWeblog), all through JPAPersistenceStrategy.getEntityManager(false)/getNamedQuery, so each statement auto-commits individually; the JPA transaction never begins because no write happens on this path.",
+ "ops_add": [
+  {
+   "op": "R",
+   "at": "Weblog.java:736",
+   "call": "JPABookmarkManagerImpl.getDefaultFolder",
+   "reads": [
+    "bookmark_folder"
+   ],
+   "api": "jpa",
+   "note": "Reached via sidebar.vm:20 $model.weblog.getBookmarkFolder(\"/\"): searchresults.vm:37 #includeTemplate($model.weblog \"sidebar\") unconditionally includes sidebar.vm, whose line 20 calls $model.weblog.getBookmarkFolder(\"/\"); Weblog.getBookmarkFolder (Weblog.java:731-744) with folderName \"/\" calls BookmarkManager.getDefaultFolder, which runs named query WeblogBookmarkFolder.getByWebsite&Name (JPABookmarkManagerImpl.java:307-323) against bookmark_folder (WeblogBookmarkFolder.orm.xml:25). Invisible to the extractor because the call happens through Velocity reflection dispatch on the model object inside the .vm template, the same class of gap calibration and reviews/notes/apache_roller-0003.md record for ModelLoader-dispatched models."
+  }
+ ],
+ "notes": "Did not exhaustively trace every macro referenced from searchresults.vm/sidebar.vm (showWeblogEntryCalendar, showAtomFeedsList, showPageMenu, etc.) beyond the one clear DB read found; confidence lowered to medium for that reason, consistent with the calibration's note that this template gap is broader than the ModelLoader half already reported.",
+ "chash": "c1ea1a67b6b1",
+ "batch": "apache_roller-0004",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:57:10"
+}

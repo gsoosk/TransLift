@@ -1,0 +1,26 @@
+{
+ "key": "b8c06dc2dbe9",
+ "verdict": "corrected",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "JPAMediaFileManagerImpl.upgradeUploadsDir (JPAMediaFileManagerImpl.java:794): for a new subdirectory, the unit begins at strategy.store(directory) inside createMediaFileDirectory (line 149, op 1), continues through the Weblog save in the same call (line 148, op 4), and commits at roller.flush() (line 61). For a file, the method calls createMediaFile (line 867), a separately cataloged region root (key 6e64f7049df5) with its own store/flush/refresh; its operations belong to that root, not this one. The method's own closing roller.flush() (line 127) has nothing left to commit once createMediaFile already committed via its own flush.",
+ "ops_remove": [
+  {
+   "n": 2,
+   "note": "MediaFile persist is JPAMediaFileManagerImpl.createMediaFile (JPAMediaFileManagerImpl.java:196), a separately cataloged region root (key 6e64f7049df5) reached from line 867."
+  },
+  {
+   "n": 3,
+   "note": "The refresh after createMediaFile's own flush (JPAMediaFileManagerImpl.java:200) belongs to root 6e64f7049df5."
+  },
+  {
+   "n": 5,
+   "note": "find(RuntimeConfigProperty) is FileContentManagerImpl.canSave's WebloggerRuntimeConfig lookup (FileContentManagerImpl.java:194), called from inside createMediaFile (root 6e64f7049df5), not this root."
+  }
+ ],
+ "notes": "After removing the operations that belong to the separately cataloged createMediaFile root, the own unit of upgradeUploadsDir covers only ops 1 and 4 (persist MediaFileDirectory, persist Weblog), via createMediaFileDirectory.",
+ "chash": "8461b7df2d86",
+ "batch": "apache_roller-0001",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-27T23:06:04"
+}

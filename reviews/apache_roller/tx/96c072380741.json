@@ -1,0 +1,12 @@
+{
+ "key": "96c072380741",
+ "verdict": "confirmed",
+ "confidence": "medium",
+ "depth": "full",
+ "boundary": "WriteToIndexOperation.run (WriteToIndexOperation.java:37-49): holds manager's Lucene ReadWriteLock write lock (lines 40-49, released in the finally) while doRun() executes; no database transaction is open (reads use getEntityManager(false)), so inside_db_tx is correctly false. The lock is an application-level Lucene index lock, not a database lock.",
+ "notes": "The 7 reads are merged across the 5 doRun() subclasses this root can dispatch to at line 42 (AddEntryOperation, RemoveEntryOperation, ReIndexEntryOperation, RemoveWebsiteIndexOperation, RebuildWebsiteIndexOperation); only AddEntryOperation.doRun (AddEntryOperation.java:60-87) and RebuildWebsiteIndexOperation.doRun (RebuildWebsiteIndexOperation.java:76-155) are shown in the draft's Code section, so confidence is medium pending a look at RemoveEntryOperation/ReIndexEntryOperation/RemoveWebsiteIndexOperation, which were not shown to confirm they add no further operations.",
+ "chash": "15bbbb484acb",
+ "batch": "pilot-apache_roller-0001",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-27T22:24:40"
+}

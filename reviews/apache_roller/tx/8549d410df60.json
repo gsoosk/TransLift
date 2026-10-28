@@ -1,0 +1,12 @@
+{
+ "key": "8549d410df60",
+ "verdict": "confirmed",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "App commit point in BasicUserAutoProvision.execute: begins at the first write, JPAUserManagerImpl.addUser's strategy.store(newUser) (BasicUserAutoProvision.java:60), and commits at flush() on line 58; the preceding BootstrapSecurity.isCompleted() and CustomUserRegistry.getUserDetailsFromAuthentication checks run no DB code.",
+ "notes": "The five unresolved calls (getScreenName/getFullName/getEmailAddress/getLocale/getTimeZone on RollerUserDetails) only read in-memory LDAP/SSO principal attributes set up by CustomUserRegistry (CustomUserRegistry.java:130-137); no implementation reaches the database.",
+ "chash": "b5e49ea3b790",
+ "batch": "apache_roller-0002",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:35:28"
+}

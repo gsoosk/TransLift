@@ -1,0 +1,80 @@
+{
+ "id": "pilot-apache_roller-0001",
+ "app": "apache_roller",
+ "created": "2026-10-27T22:22:21",
+ "pilot": true,
+ "tokens": 19225,
+ "large": false,
+ "items": [
+  {
+   "key": "250ee4ce4855",
+   "id": "apache_roller:3",
+   "app": "apache_roller",
+   "kind": "explicit",
+   "subkind": "programmatic-region",
+   "root": "FrontpageSettings.applyInitial",
+   "file": "app/src/main/java/org/apache/roller/weblogger/business/FrontpageSettings.java",
+   "line": 84,
+   "n_ops": 5,
+   "chash": "044993f2c892",
+   "draft": "drafts/apache_roller/explicit/250ee4ce4855.md",
+   "tokens": 2294
+  },
+  {
+   "key": "1072bc347f3d",
+   "id": "apache_roller:11",
+   "app": "apache_roller",
+   "kind": "explicit",
+   "subkind": "programmatic-region",
+   "root": "JPAMediaFileManagerImpl.updateThumbnail",
+   "file": "app/src/main/java/org/apache/roller/weblogger/business/jpa/JPAMediaFileManagerImpl.java",
+   "line": 252,
+   "n_ops": 2,
+   "chash": "f44e638d1afb",
+   "draft": "drafts/apache_roller/explicit/1072bc347f3d.md",
+   "tokens": 1175
+  },
+  {
+   "key": "159907733aa7",
+   "id": "apache_roller:175",
+   "app": "apache_roller",
+   "kind": "adhoc",
+   "subkind": "synchronized-method",
+   "root": "SmileysPlugin.init",
+   "file": "app/src/main/java/org/apache/roller/weblogger/business/plugins/entry/SmileysPlugin.java",
+   "line": 81,
+   "n_ops": 1,
+   "chash": "d2638c43f584",
+   "draft": "drafts/apache_roller/adhoc/159907733aa7.md",
+   "tokens": 1393
+  },
+  {
+   "key": "96c072380741",
+   "id": "apache_roller:176",
+   "app": "apache_roller",
+   "kind": "adhoc",
+   "subkind": "app-lock:LOCK",
+   "root": "WriteToIndexOperation.run",
+   "file": "app/src/main/java/org/apache/roller/weblogger/business/search/lucene/WriteToIndexOperation.java",
+   "line": 37,
+   "n_ops": 7,
+   "chash": "15bbbb484acb",
+   "draft": "drafts/apache_roller/adhoc/96c072380741.md",
+   "tokens": 6933
+  },
+  {
+   "key": "11fbbb1a491d",
+   "id": "apache_roller:23",
+   "app": "apache_roller",
+   "kind": "explicit",
+   "subkind": "programmatic-region",
+   "root": "DatabaseInstaller.upgradeTo400",
+   "file": "app/src/main/java/org/apache/roller/weblogger/business/startup/DatabaseInstaller.java",
+   "line": 293,
+   "n_ops": 30,
+   "chash": "e032ef1aa260",
+   "draft": "drafts/apache_roller/explicit/11fbbb1a491d.md",
+   "tokens": 7430
+  }
+ ]
+}

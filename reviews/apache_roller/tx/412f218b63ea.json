@@ -1,0 +1,11 @@
+{
+ "key": "412f218b63ea",
+ "verdict": "confirmed",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "App commit point in BootstrapSecurity.completeIfInstalled: the region begins lazily at the first write, properties.saveProperty(...) at BootstrapSecurity.java:107, and commits at weblogger.flush() on line 108; the completion-marker read (getProperty, line 100) and the user-count check (getUserCount(), line 101) both run before that and auto-commit outside the unit, which is why neither has an op of its own.",
+ "chash": "4c224f717a97",
+ "batch": "apache_roller-0002",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:35:28"
+}

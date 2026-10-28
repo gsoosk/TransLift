@@ -1,0 +1,26 @@
+{
+ "key": "57753cd62e0f",
+ "verdict": "corrected",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "App commit point in PlanetGroupSubs.saveSubscription: per app calibration the region begins lazily at the first write, `pmgr.saveSubscription(sub)` at PlanetGroupSubs.java:54 (only when the subscription is new), and always continues through `pmgr.saveGroup(planetGroup)` at line 64; it commits at flush() on line 65. Everything on the path to resolving `sub` -- the existence check (getSubscription, line 45) and, when the sub is new, the whole feed fetch (FeedFetcher.fetchSubscription, line 51, including the HTTP call and the per-entry User/RuntimeConfigProperty lookups) -- runs before that first write and auto-commits (or auto-reads) outside this unit.",
+ "ops_remove": [
+  {
+   "n": 3,
+   "note": "JPAUserManagerImpl.getUserByUserName (WeblogEntry.getCreator, called inside WebloggerRomeFeedFetcher.fetchSubscription's entry loop, WebloggerRomeFeedFetcher.java:328) runs as part of the feed fetch at PlanetGroupSubs.java:51, before the region's first write at line 54; it auto-commits outside this unit."
+  },
+  {
+   "n": 4,
+   "note": "JPAPersistenceStrategy.find on RuntimeConfigProperty, reached from the same pre-fetch call chain (PlanetGroupSubs.java:51), runs before the region's first write at line 54; outside this unit."
+  },
+  {
+   "n": 5,
+   "note": "JPAPersistenceStrategy.find on User (cache-miss path inside getUserByUserName, JPAUserManagerImpl.java:528), reached from the same pre-fetch call chain (PlanetGroupSubs.java:51), runs before the region's first write at line 54; outside this unit."
+  }
+ ],
+ "notes": "Tables read (roller_properties, roller_user) in the header belong to that pre-boundary feed fetch and should be dropped along with ops 3-5; the remaining in-boundary operations are the two conditional persists (rag_subscription, rag_group). The http effect (RomeFeedFetcher.fetchFeed, line 232) also runs before the first write, so it likewise sits outside the committed unit, though it is still reachable from this root.",
+ "chash": "bd3bf5166cb3",
+ "batch": "apache_roller-0002",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:35:28"
+}

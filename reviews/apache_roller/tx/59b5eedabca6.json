@@ -1,0 +1,25 @@
+{
+ "key": "59b5eedabca6",
+ "verdict": "corrected",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "CommentDataServlet.doPut is the commit-point region: the lazy JPA transaction begins at wmgr.saveComment's strategy.store(c) call (CommentDataServlet.java:112, JPAPersistenceStrategy.java:171-178, which also writes weblog via saveComment's internal saveWeblog call) and commits at roller.flush() (CommentDataServlet.java:113). RollerSession.getRollerSession (line 105), reached before the region begins, conditionally calls BasicUserAutoProvision.execute (RollerSession.java:149-150), which is itself a separately catalogued commit-point region (apache_roller:32/8549d410df60: its own addUser/grantRole writes and its own WebloggerFactory.getWeblogger().flush() at BasicUserAutoProvision.java:270) that commits on its own before doPut's region begins.",
+ "ops_remove": [
+  {
+   "n": 3,
+   "note": "User persist (roller_user) belongs to the nested region BasicUserAutoProvision.execute (apache_roller:32/8549d410df60, addUser -> strategy.store, BasicUserAutoProvision.java:259), which flushes/commits independently at line 270 before doPut's own region begins; the same class of region-in-region nesting documented in reviews/notes/apache_roller-0001.md."
+  },
+  {
+   "n": 4,
+   "note": "hasRole's read (userrole) also belongs to the nested BasicUserAutoProvision.execute region (via grantRole, BasicUserAutoProvision.java:267), not to this one."
+  },
+  {
+   "n": 5,
+   "note": "UserRole persist (userrole) is grantRole's write inside the same nested BasicUserAutoProvision.execute region, not this one."
+  }
+ ],
+ "chash": "a26abf1e99e1",
+ "batch": "apache_roller-0004",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:56:44"
+}

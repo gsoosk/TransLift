@@ -1,0 +1,58 @@
+{
+ "key": "7e7b49c8e380",
+ "verdict": "corrected",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "JPAMediaFileManagerImpl.upgradeFileStorage (JPAMediaFileManagerImpl.java:721): for each weblog directory, the per-iteration lookups (getWeblogByHandle, getWeblogUsers/admin-permission check, getDefaultMediaFileDirectory) run with FlushModeType.COMMIT and no write yet, so they auto-commit before the lazily-begun unit starts (app fact). When the weblog has no default media-file directory (root == null), the unit begins at strategy.store(directory) inside createDefaultMediaFileDirectory -> createMediaFileDirectory (line 149, op 5), continues through the Weblog save in the same call (line 152, op 11), and commits at roller.flush() (line 80). The following upgradeUploadsDir call (line 84) is a separately cataloged region root (key b8c06dc2dbe9) that itself calls createMediaFile (key 6e64f7049df5); their operations belong to those roots, not this one.",
+ "ops_remove": [
+  {
+   "n": 1,
+   "note": "getWeblogByHandle (JPAWeblogManagerImpl.java:409) runs before any write in this loop iteration; it auto-commits with no transaction open (app fact)."
+  },
+  {
+   "n": 2,
+   "note": "getWeblogPermissions, reached via getWeblogUsers for the admin-user check (line 745), runs before the write that begins the unit."
+  },
+  {
+   "n": 3,
+   "note": "getMediaFileDirectoryByName, reached via getDefaultMediaFileDirectory (line 758), runs before the write that begins the unit."
+  },
+  {
+   "n": 4,
+   "note": "The cache-hit find(Weblog) inside getWeblogByHandle also runs before any write."
+  },
+  {
+   "n": 8,
+   "note": "getUserByUserName query, part of the admin-permission check loop (line 750), runs before the write that begins the unit."
+  },
+  {
+   "n": 9,
+   "note": "getRoles, reached from the same admin-permission check (User.hasGlobalPermission at line 750), runs before the write."
+  },
+  {
+   "n": 10,
+   "note": "getWeblogPermission, reached from the same admin-permission check, runs before the write."
+  },
+  {
+   "n": 12,
+   "note": "The cache-hit find(User), the same getUserByUserName chain as op 8, runs before the write."
+  },
+  {
+   "n": 6,
+   "note": "MediaFile persist is JPAMediaFileManagerImpl.createMediaFile (JPAMediaFileManagerImpl.java:217), a separately cataloged region root (key 6e64f7049df5) reached via upgradeUploadsDir (root b8c06dc2dbe9) called from line 767."
+  },
+  {
+   "n": 7,
+   "note": "The refresh after createMediaFile's own flush (JPAMediaFileManagerImpl.java:217) belongs to root 6e64f7049df5, not this one."
+  },
+  {
+   "n": 13,
+   "note": "find(RuntimeConfigProperty) is FileContentManagerImpl.canSave's WebloggerRuntimeConfig lookup (FileContentManagerImpl.java:194/207), called from createMediaFile inside the upgradeUploadsDir branch (root 6e64f7049df5)."
+  }
+ ],
+ "notes": "After removing the pre-write reads and the operations that belong to the separately cataloged upgradeUploadsDir/createMediaFile roots, the own unit of upgradeFileStorage covers only ops 5 and 11 (persist MediaFileDirectory, persist Weblog), run only when a weblog's default media-file directory does not yet exist.",
+ "chash": "1e6308ec5a91",
+ "batch": "apache_roller-0001",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-27T23:06:04"
+}

@@ -1,0 +1,11 @@
+{
+ "key": "db1100c03d9c",
+ "verdict": "confirmed",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "App commit point in PlanetGroupSubs.deleteSubscription: the region begins lazily at the first write, `pmgr.saveGroup(planetGroup)` at PlanetGroupSubs.java:259, continues through `pmgr.saveSubscription(sub)` at line 265, and commits at flush() on line 267; the `getSubscription` lookup at line 255 runs before that and auto-commits outside the unit (the extractor already omits it, as it has no op of its own).",
+ "chash": "44a9e5035541",
+ "batch": "apache_roller-0002",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:35:28"
+}

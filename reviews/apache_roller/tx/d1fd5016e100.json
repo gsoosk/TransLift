@@ -1,0 +1,33 @@
+{
+ "key": "d1fd5016e100",
+ "verdict": "corrected",
+ "confidence": "medium",
+ "depth": "full",
+ "boundary": "JPAWeblogManagerImpl.addWeblog (JPAWeblogManagerImpl.java:280) holds three sequential units. Unit A begins at strategy.store(newWeblog) (line 282, op 1) and commits at the method's own flush (line 283). addWeblogContents (line 284) then runs unit B: it begins at grantWeblogPermission's persist (line 78 of addWeblogContents, op 6), continues through the category loop (op 2), newWeblog.setBloggerCategory (line 103, a dirty-check update of the already-managed Weblog), the default-folder store (op 3), the blogroll loop (op 4) and createDefaultMediaFileDirectory (op 8), and commits at addWeblogContents' own flush (line 134). The ping-target loop that follows (lines 140-146) is a third, separate unit: getCommonPingTargets (op 5) runs with no transaction open after unit B's commit and auto-commits on its own; the AutoPing persist for each auto-enabled target (op 7) then lazily begins a new unit that this method never flushes - it is left open/uncommitted when addWeblog returns.",
+ "ops_remove": [
+  {
+   "n": 5,
+   "note": "getCommonPingTargets (JPAPingTargetManagerImpl.java:150) runs after addWeblogContents' flush (line 134) closes unit B, before any write of the ping-target loop, and auto-commits separately with FlushModeType.COMMIT."
+  }
+ ],
+ "ops_add": [
+  {
+   "op": "W",
+   "at": "JPAWeblogManagerImpl:103",
+   "call": "newWeblog.setBloggerCategory (dirty check)",
+   "writes": [
+    "weblog"
+   ],
+   "flags": [
+    "dirty-check"
+   ],
+   "cond": true,
+   "note": "newWeblog is already managed (persisted in unit A), so the setter at addWeblogContents.java:103 is written back by dirty checking at unit B's flush (line 134), not by the second this.strategy.store(newWeblog) at line 106, which is a no-op since the entity is already contained."
+  }
+ ],
+ "notes": "The AutoPing write (op 7) is reached and real, but this method itself never commits it; flag it as an unflushed write in the boundary rather than removing it.",
+ "chash": "faef1ff5ae7b",
+ "batch": "apache_roller-0001",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-27T23:06:04"
+}

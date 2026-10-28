@@ -1,0 +1,11 @@
+{
+ "key": "d3ab450cd6ac",
+ "verdict": "confirmed",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "JPAMediaFileManagerImpl.moveMediaFiles (JPAMediaFileManagerImpl.java:106): the unit begins at the first strategy.store in the loop (line 38, op 1), continues through the loop's MediaFileDirectory store (op 2) and the Weblog save via saveWeblog (line 44, op 3) - all before the commit - and commits at roller.flush() (line 47). The strategy.refresh calls at lines 49 and 53 run after the commit, outside the unit; they are not DB writes and are already excluded from the operations table.",
+ "chash": "14116566fa10",
+ "batch": "apache_roller-0001",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-27T23:06:04"
+}

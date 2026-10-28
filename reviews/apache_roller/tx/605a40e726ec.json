@@ -1,0 +1,17 @@
+{
+ "key": "605a40e726ec",
+ "verdict": "corrected",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "PingTargetEdit.execute is the commit-point region, but myValidate() (line 88) runs entirely before it, via getEntityManager(false)/named-query reads with no write, so its targetNameExists/getCommonPingTargets read auto-commits separately and runs outside this unit. The lazy JPA transaction actually begins at pingTargetMgr.savePingTarget's strategy.store call (PingTargetEdit.java:95, JPAPersistenceStrategy.java:171-178) and commits at WebloggerFactory.getWeblogger().flush() (PingTargetEdit.java:97).",
+ "ops_remove": [
+  {
+   "n": 2,
+   "note": "getCommonPingTargets (JPAPingTargetManagerImpl.java:145-151, via targetNameExists) is reached only from myValidate (PingTargetEdit.java:88), which runs before any write; per the app's lazy-begin rule (reviews/apache_roller/calibration.md:10-11) this read auto-commits outside the save region, not inside it."
+  }
+ ],
+ "chash": "21015ea1b227",
+ "batch": "apache_roller-0004",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:56:44"
+}

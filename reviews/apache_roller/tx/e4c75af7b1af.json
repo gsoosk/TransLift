@@ -1,0 +1,18 @@
+{
+ "key": "e4c75af7b1af",
+ "verdict": "corrected",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "JPAMediaFileManagerImpl.createThemeMediaFile (JPAMediaFileManagerImpl.java:230): the unit begins at strategy.store(mediaFile) (line 235, op 1) and commits at roller.flush() (line 238). strategy.refresh (line 239), roller.getWeblogManager().saveWeblog(weblog) (line 242, op 2) and cmgr.saveFileContent run after the commit, with no transaction open, outside this unit. If mediaFile.isImageFile() the method then calls updateThumbnail (line 248), a separately cataloged region root (key 1072bc347f3d) with its own store/flush.",
+ "ops_remove": [
+  {
+   "n": 2,
+   "note": "roller.getWeblogManager().saveWeblog(weblog) (JPAMediaFileManagerImpl.java:242) runs after roller.flush() at line 238 commits the unit; its persist starts a new, separate unit of work that this method does not itself commit."
+  }
+ ],
+ "notes": "Shape becomes single-write (one persist of MediaFile) after removing the post-commit Weblog write.",
+ "chash": "2092c4b450da",
+ "batch": "apache_roller-0001",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-27T23:06:04"
+}

@@ -1,0 +1,12 @@
+{
+ "key": "9464066232aa",
+ "verdict": "confirmed",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "No transaction: ValidateSaltFilter.doFilter, on a POST that is not an already-handled multipart Struts action, calls SaltValidator.requireSubmittedSalt -> consumeSubmittedSalt (SaltValidator.java:52), which calls RollerSession.getRollerSession; that runs two auto-committing JPA reads of its own (JPAUserManagerImpl.getUserByUserName -> getUser, RollerSession.java:81/91, on roller_user) and, only when a principal exists with no cached user and LDAP auto-provisioning is enabled, conditionally calls the explicit region BasicUserAutoProvision.execute (RollerSession.java:90, commits on its own, writes roller_user and userrole); the salt cache get/remove under `synchronized (saltCache)` (SaltValidator.java:100-105) is an in-memory lock, not a database one.",
+ "notes": "Same pattern as LoadSaltFilter (b8867bf78f76): the called explicit transaction's writes are correctly folded into this record's header; shape read-then-write matches the overlap on roller_user.",
+ "chash": "d1b07a73a8f5",
+ "batch": "apache_roller-0002",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:35:40"
+}

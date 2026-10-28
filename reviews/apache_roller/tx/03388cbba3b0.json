@@ -1,0 +1,33 @@
+{
+ "key": "03388cbba3b0",
+ "verdict": "corrected",
+ "confidence": "medium",
+ "depth": "full",
+ "boundary": "No transaction: FeedServlet.doGet reads (weblog lookup, site-wide/boolean-property checks, category/tag validation) each go through JPAPersistenceStrategy.getEntityManager(false) and auto-commit individually; rendering afterwards (renderer.render, line 259) runs the Velocity template, which pulls more reads through the loaded rendering models.",
+ "ops_fix": [
+  {
+   "n": 1,
+   "reads": [
+    "roller_weblogentrytagagg"
+   ],
+   "note": "getTagComboExists builds 'SELECT DISTINCT w.name FROM WeblogEntryTagAggregate w WHERE ...' (JPAWeblogEntryManagerImpl.java:519, executed at :547); the entity name in the JPQL is static text, not runtime-chosen, and WeblogEntryTagAggregate.orm.xml:12 maps it to table roller_weblogentrytagagg, so the table is resolvable, not unknown."
+  }
+ ],
+ "ops_add": [
+  {
+   "op": "R",
+   "at": "WeblogEntriesListPager.java:119",
+   "call": "WeblogEntryManager.getWeblogEntries, via FeedModel.getWeblogEntriesPager()",
+   "reads": [
+    "weblogentry"
+   ],
+   "cond": true,
+   "note": "The rss/atom entries templates read $model.weblogEntriesPager.items (weblog-entries-rss.vm:39, weblog-entries-atom.vm uses the same pager); FeedModel.getWeblogEntriesPager() (FeedModel.java:125-127) builds a FeedEntriesPager whose constructor (WeblogEntriesListPager.java:87) immediately calls getItems(), which runs a dynamic JPQL query against WeblogEntry (table weblogentry, WeblogEntry.orm.xml:25) at WeblogEntriesListPager.java:119-120. Only runs for the entries feed templates (pageId selection, FeedServlet.java:174-189); other feed types (comments, media) use different pagers not traced here."
+  }
+ ],
+ "notes": "ModelLoader.loadModels (FeedServlet.java:202,209,216) dispatches by class name to Model.init for FeedModel/ConfigModel/UtilitiesModel/URLModel/MessageModel(/SiteModel/PlanetModel if site-wide); only FeedModel's pager getters do further DB work and only the one traced above was confirmed against the templates actually shipped with the app. The other pagers reachable from the model (getCommentsPager, getMediaFilesPager) and SiteModel/PlanetModel for site-wide feeds were not individually traced, so confidence is medium.",
+ "chash": "c899c531feec",
+ "batch": "apache_roller-0003",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:45:58"
+}

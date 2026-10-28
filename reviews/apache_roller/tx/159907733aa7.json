@@ -1,0 +1,12 @@
+{
+ "key": "159907733aa7",
+ "verdict": "confirmed",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "synchronized method SmileysPlugin.init (SmileysPlugin.java:82), guarding the static arrays smileyPatterns/imageTags; inside it, WebloggerRuntimeConfig.getAbsoluteContextURL (line 85) reads a config property with no open database transaction (plain getEntityManager(false) read), so the whole method runs with no DB transaction held across the lock.",
+ "notes": "Marginal as a database-relevant adhoc transaction: the lock protects only in-memory static arrays, and the single read (conditional on the arrays being unpopulated) is a config lookup via WebloggerRuntimeConfig, not application data. Kept per the extractor's listing since it does reach the database while the lock is held.",
+ "chash": "d2638c43f584",
+ "batch": "pilot-apache_roller-0001",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-27T22:24:40"
+}

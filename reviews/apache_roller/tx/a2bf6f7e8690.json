@@ -1,0 +1,22 @@
+{
+ "key": "a2bf6f7e8690",
+ "verdict": "corrected",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "Programmatic region in JPAWeblogManagerImpl.addWeblogContents (JPAPersistenceStrategy commit-point): the unit really begins at the first write, the WeblogPermission store inside UserManager.grantWeblogPermission (JPAUserManagerImpl.java:425/429), reached unconditionally from addWeblogContents.java:39-40 -- earlier than the extractor's own marker at line 58 (the first store(c) in the categories loop). It commits at strategy.flush() (JPAWeblogManagerImpl.java:95). The auto-ping loop at lines 97-107 (ops 5 and 7) runs after that flush, so it belongs to a new, uncommitted unit, not this region.",
+ "ops_remove": [
+  {
+   "n": 5,
+   "note": "pingTargetMgr.getCommonPingTargets() is called at JPAWeblogManagerImpl.java:101, after the method's own flush() at line 95; per app calibration this runs in a new, uncommitted unit, not this committed region."
+  },
+  {
+   "n": 7,
+   "note": "autoPingMgr.saveAutoPing at JPAWeblogManagerImpl.java:105, inside the same post-flush loop (lines 97-107); runs after the line-95 flush, in a new, uncommitted unit."
+  }
+ ],
+ "notes": "Op 6 (WeblogPermission/roller_permission) is reached via grantWeblogPermission (JPAUserManagerImpl.java:410-431), called unconditionally at addWeblogContents.java:39-40; its own read of weblogpermission (the existence check at JPAUserManagerImpl.java:413-420) runs before any write and is not counted as a separate operation in the draft.",
+ "chash": "f684d8d7bf0a",
+ "batch": "apache_roller-0002",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:30:55"
+}

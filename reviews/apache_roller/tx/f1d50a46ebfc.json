@@ -1,0 +1,11 @@
+{
+ "key": "f1d50a46ebfc",
+ "verdict": "confirmed",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "Programmatic region in PingQueueTask.runTask (app commit point): the EntityManager transaction begins lazily at the first write reached through processQueue (the pingqueueentry remove/store calls), and commits at WebloggerFactory.getWeblogger().flush() (PingQueueTask.java:140); the finally block's release() (PingQueueTask.java:150) rolls back only if an exception escapes before the flush.",
+ "chash": "7f4756deb0e0",
+ "batch": "apache_roller-0002",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:30:55"
+}

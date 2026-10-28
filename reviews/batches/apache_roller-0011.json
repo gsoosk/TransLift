@@ -1,0 +1,52 @@
+{
+ "id": "apache_roller-0011",
+ "app": "apache_roller",
+ "created": "2026-10-27T22:54:13",
+ "pilot": false,
+ "tokens": 15954,
+ "large": false,
+ "items": [
+  {
+   "key": "09412a316962",
+   "id": "apache_roller:101",
+   "app": "apache_roller",
+   "kind": "explicit",
+   "subkind": "programmatic-region",
+   "root": "MetaWeblogAPIHandler.editPost",
+   "file": "app/src/main/java/org/apache/roller/weblogger/webservices/xmlrpc/MetaWeblogAPIHandler.java",
+   "line": 126,
+   "n_ops": 11,
+   "chash": "1d2674e3e597",
+   "draft": "drafts/apache_roller/explicit/09412a316962.md",
+   "tokens": 6573
+  },
+  {
+   "key": "f68ee9aeb239",
+   "id": "apache_roller:103",
+   "app": "apache_roller",
+   "kind": "explicit",
+   "subkind": "programmatic-region",
+   "root": "MetaWeblogAPIHandler.newPost",
+   "file": "app/src/main/java/org/apache/roller/weblogger/webservices/xmlrpc/MetaWeblogAPIHandler.java",
+   "line": 226,
+   "n_ops": 12,
+   "chash": "3006334aa5e0",
+   "draft": "drafts/apache_roller/explicit/f68ee9aeb239.md",
+   "tokens": 7003
+  },
+  {
+   "key": "29d8d8386ef4",
+   "id": "apache_roller:102",
+   "app": "apache_roller",
+   "kind": "explicit",
+   "subkind": "programmatic-region",
+   "root": "MetaWeblogAPIHandler.newMediaObject",
+   "file": "app/src/main/java/org/apache/roller/weblogger/webservices/xmlrpc/MetaWeblogAPIHandler.java",
+   "line": 356,
+   "n_ops": 3,
+   "chash": "3d9ba25d20c6",
+   "draft": "drafts/apache_roller/explicit/29d8d8386ef4.md",
+   "tokens": 2378
+  }
+ ]
+}

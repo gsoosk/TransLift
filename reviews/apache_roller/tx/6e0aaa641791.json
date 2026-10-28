@@ -1,0 +1,11 @@
+{
+ "key": "6e0aaa641791",
+ "verdict": "confirmed",
+ "confidence": "high",
+ "depth": "full",
+ "boundary": "No transaction of its own: CommentDataServlet.doGet reads WeblogEntryComment/Weblog/User/UserRole/WeblogPermission through getEntityManager(false), auto-committing per statement; its own operations are all reads, but since weblog.hasUserPermission (line 67) checks a real WeblogPermission instance (Weblog.hasUserPermissions:373 constructs `new WeblogPermission(this, user, actions)`), JPAUserManagerImpl.checkPermission's `perm instanceof WeblogPermission` branch (:362) is live here and correctly reached, unlike the UserEdit.save root. The write units (roller_user, userrole) come entirely from the conditionally-called explicit transaction BasicUserAutoProvision.execute (RollerSession.java:145, commits on its own, catalogued separately as apache_roller:32/8549d410df60), consistent with implicit/web rules for tables contributed by called explicit transactions.",
+ "chash": "73a6dd6cd108",
+ "batch": "apache_roller-0004",
+ "app": "apache_roller",
+ "stamped_at": "2026-10-28T10:56:44"
+}
